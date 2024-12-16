@@ -4,15 +4,51 @@ import Navbar from "../Layout/Navbar";
 import logo from '../Layout/Image/logo.jpeg';
 import Glogo from "../Layout/Image/Glogo.png";
 import Select from "./Select";
+import axios from "axios";
+import { Formerrors, hasFormerror, inputValidation, isFormEmpty } from "../../validation/validation";
 
 const Register: React.FC = () => {
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmpassword: ""
+  });
+
+  const [error, setError] = useState<Formerrors>({});
+
+  const handlechange = (e: React.ChangeEvent<HTMLInputElement>)=>{
+    const {name,value} = e.target;
+    const error = inputValidation(name,value);
+    setFormData({ ...formData,[name]:value});
+  }
 
 
-  const [formData,setFormData] = useState({
-    firstname:"",
-    secondname:"",
-    
-  })
+
+
+  const hanldeRegister = async (e:React.FormEvent)=>{
+    e.preventDefault();
+
+
+    if(hasFormerror(error)&&isFormEmpty(formData)){
+      try {
+        const response = await axios.post("http://localhost:3009/register",formData,{
+          headers:{
+            "Content-Type":"multipart/form-data"
+          },
+        });
+
+
+        console.log(response)
+      } catch (error) {
+        
+      }
+    }
+  }
+
+
   console.log("this page is regisetr")
 
   return (
@@ -64,14 +100,40 @@ const Register: React.FC = () => {
               CONTINUE WITH GOOGLE
             </button>
             <form className="space-y-6">
+            <input
+                type="firstname"
+                placeholder="First Name"
+                value={formData.firstname}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+              />
+              <input
+                type="lastname"
+                placeholder="Last Name"
+                value={formData.lastname}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+              />
               <input
                 type="email"
                 placeholder="Email"
+                value={formData.email}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+              />
+               <input
+                type="number"
+                placeholder="Phone"
+                value={formData.phone}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <input
                 type="password"
                 placeholder="Password"
+                value={formData.password}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+              />
+               <input
+                type="confirmpassword"
+                placeholder="Confirm Password"
+                value={formData.confirmpassword}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <button
@@ -79,7 +141,7 @@ const Register: React.FC = () => {
                 className="w-full text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-800 focus:outline-none focus:ring focus:ring-indigo-300"
                 style={{ background: "#00186E" }}
               >
-                SIGN IN
+                SIGN UP
               </button>
             </form>
             <p className="text-center text-sm text-gray-600 mt-4">
