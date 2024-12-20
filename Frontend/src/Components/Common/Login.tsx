@@ -4,11 +4,13 @@ import Navbar from "../Layout/Navbar";
 import Registerimg from "../Layout/Image/Registerimg.png"; 
 import logo from "../Layout/Image/logo.jpeg"; 
 import Glogo from "../Layout/Image/Glogo.png"; 
+import Register from "./Register";
 
 
 const Login: React.FC = () => {
   const location = useLocation();
-  const heading = location.state?.heading || "LOGIN";
+  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
+
 
   return (
     <>
@@ -44,7 +46,7 @@ const Login: React.FC = () => {
           </div>
           <div className="flex-1 p-6 md:p-10">
             <h3 className="text-lg md:text-xl font-bold text-gray-700 text-center mb-8">
-              {heading}
+              LOGIN AS {userType.toUpperCase()}
             </h3>
             <button className="flex items-center justify-center w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg mb-6">
               <img src={Glogo} alt="Google logo" className="w-5 h-5 mr-2" />
@@ -71,7 +73,7 @@ const Login: React.FC = () => {
             </form>
             <p className="text-center text-sm text-gray-600 mt-6">
               If you don't have an account?{" "}
-              <a href="/login" className="font-semibold hover:underline" style={{ color: "#00186E" }}>
+              <a href={`/${userType}/register`} className="font-semibold hover:underline" style={{ color: "#00186E" }}>
                 REGISTER
               </a>
             </p>

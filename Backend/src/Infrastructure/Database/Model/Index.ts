@@ -1,0 +1,1 @@
+export {default as EntrepreneurModel} from './Entrepreneurmodel'  

@@ -1,72 +1,103 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom"; // Import useLocation
 import Registerimg from "../Layout/Image/Registerimg.png";
 import Navbar from "../Layout/Navbar";
-import logo from '../Layout/Image/logo.jpeg';
+import logo from "../Layout/Image/logo.jpeg";
 import Glogo from "../Layout/Image/Glogo.png";
-import Select from "./Select";
-import axios from "axios";
-import { Formerrors, hasFormerror, inputValidation, isFormEmpty } from "../../validation/validation";
+import axios from "axios"; 
+import Otp from "./OTP";
+import * as CryptoJS from 'crypto-js';
+
+
+
 
 const Register: React.FC = () => {
-  const [formData, setFormData] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmpassword: ""
-  });
+  const location = useLocation(); // Get location
+  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
+  const navigate = useNavigate()
 
-  const [error, setError] = useState<Formerrors>({});
+  const firstnameRef = useRef<HTMLInputElement>(null);
+  const lastnameRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const emailref = useRef<HTMLInputElement>(null);
+  const PasswordRef = useRef<HTMLInputElement>(null);
+  const confirmPassRef = useRef<HTMLInputElement>(null);
 
-  const handlechange = (e: React.ChangeEvent<HTMLInputElement>)=>{
-    const {name,value} = e.target;
-    const error = inputValidation(name,value);
-    setFormData({ ...formData,[name]:value});
-  }
+  const [firstnameError, setfirstnameError] = useState('');
+  const [lastnameError, setlastnameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPassError] = useState('');
 
-
-
-
-  const hanldeRegister = async (e:React.FormEvent)=>{
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    setfirstnameError('');
+    setlastnameError('');
+    setPhoneError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPassError('');
 
-    if(hasFormerror(error)&&isFormEmpty(formData)){
-      try {
-        const response = await axios.post("http://localhost:3009/register",formData,{
-          headers:{
-            "Content-Type":"multipart/form-data"
-          },
-        });
+    if (!firstnameRef.current || !lastnameRef.current || !emailref.current || !phoneRef.current || !PasswordRef.current || !confirmPassRef.current) {
+      console.error("Refs are not initialized");
+      return;
+    }
+    const encryptedEmail = CryptoJS.AES.encrypt(emailref.current.value, "emailsecret").toString();
+    console.log("Encrypted Email:", encryptedEmail);
+    
+    try {
+      const formData = new FormData();
+      formData.append("firstname", firstnameRef.current.value);
+      formData.append("lastname", lastnameRef.current.value);
+      formData.append("email", emailref.current.value);
+      formData.append("phone", phoneRef.current.value);
+      formData.append("password", PasswordRef.current.value);
+      formData.append("confirmpassword", confirmPassRef.current.value);
 
 
-        console.log(response)
-      } catch (error) {
-        
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:${value}`)
+     }
+      const response = await axios.post(`http://localhost:3009/api/${userType}/register`, formData,{
+        headers:{
+          'Content-Type' : 'application/json'
+        }
+      });
+      console.log("Registration successful:", response.data);
+       if(response){
+        navigate(`/${userType}/otp?email=${encryptedEmail}`)
+      }
+    } catch (error) {
+      console.error("Registration failed:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data);
+      } else {
+        console.error("Unknown error:", error);
       }
     }
-  }
+  };
 
 
-  console.log("this page is regisetr")
+
 
   return (
     <>
       <Navbar
         logoUrl={logo}
         links={[
-          { label: 'Home', href: '/' },
-          { label: 'Explore Premium', href: '/explore-premium' },
-          { label: 'About Us', href: '/about-us' },
-          { label: 'Login', href: '/login' },
+          { label: "Home", href: "/" },
+          { label: "Explore Premium", href: "/explore-premium" },
+          { label: "About Us", href: "/about-us" },
+          { label: "Login", href: "/login" },
         ]}
       />
       <div className="flex justify-center items-center min-h-screen bg-gray-100 p-2 sm:p-4 relative">
         <div
           className="bg-white rounded-[2%] shadow-lg p-4 sm:p-6 md:p-10 flex flex-col md:flex-row w-full max-w-sm sm:max-w-md md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
           style={{
-            minHeight: "80vh", 
+            minHeight: "80vh",
             height: "auto",
           }}
         >
@@ -89,51 +120,47 @@ const Register: React.FC = () => {
 
           <div className="flex-1 p-4 sm:p-6 md:p-10">
             <h3 className="text-md sm:text-lg md:text-xl font-bold text-gray-700 text-center mb-4 sm:mb-6">
-              REGISTER AS ENTREPRENEUR
+              REGISTER AS {userType.toUpperCase()}
             </h3>
             <button className="flex items-center justify-center w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg mb-4">
-              <img
-                src={Glogo}
-                alt="Google logo"
-                className="w-5 h-5 mr-2"
-              />
+              <img src={Glogo} alt="Google logo" className="w-5 h-5 mr-2" />
               CONTINUE WITH GOOGLE
             </button>
-            <form className="space-y-6">
-            <input
-                type="firstname"
+            <form onSubmit={handleRegister} className="space-y-6">
+              <input
+                ref={firstnameRef}
+                type="text"
                 placeholder="First Name"
-                value={formData.firstname}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <input
-                type="lastname"
+                ref={lastnameRef}
+                type="text"
                 placeholder="Last Name"
-                value={formData.lastname}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <input
+                ref={emailref}
                 type="email"
                 placeholder="Email"
-                value={formData.email}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
-              />
-               <input
-                type="number"
-                placeholder="Phone"
-                value={formData.phone}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <input
-                type="password"
-                placeholder="Password"
-                value={formData.password}
+                ref={phoneRef}
+                type="number"
+                placeholder="Phone"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
-               <input
-                type="confirmpassword"
+              <input
+                ref={PasswordRef}
+                type="password"
+                placeholder="Password"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
+              />
+              <input
+                ref={confirmPassRef}
+                type="password"
                 placeholder="Confirm Password"
-                value={formData.confirmpassword}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <button
@@ -145,9 +172,9 @@ const Register: React.FC = () => {
               </button>
             </form>
             <p className="text-center text-sm text-gray-600 mt-4">
-              If you already have an account?{' '}
+              If you already have an account?{" "}
               <a
-                href="/login"
+                href={`/${userType}/login`} // Dynamic link based on user type
                 className="font-semibold hover:underline"
                 style={{ color: "#00186E" }}
               >
@@ -157,9 +184,8 @@ const Register: React.FC = () => {
           </div>
         </div>
       </div>
-    </>
+         </>
   );
 };
 
 export default Register;
-
