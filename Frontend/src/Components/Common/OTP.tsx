@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Registerimg from "../Layout/Image/Registerimg.png";
-import { useLocation,useSearchParams } from "react-router-dom";
+import { useLocation,useNavigate,useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 interface OtpInputProps {
@@ -10,7 +10,7 @@ interface OtpInputProps {
 const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
   const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
   const queryParams = new URLSearchParams(location.search);
-
+  const navigate = useNavigate()
   const [otp, setOtp] = useState<string[]>(new Array(length).fill(""));
   const [timer, setTimer] = useState<number>(30);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -57,7 +57,10 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
                 }
       );
       console.log(response, "this be the response");
-    } catch (error) {
+      if(response)
+{
+   navigate(`/${userType}/login`)
+}    } catch (error) {
       console.error(error);
     }
   } 

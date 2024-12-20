@@ -33,10 +33,11 @@ export class EntrepreneurController {
     }
 
     async verifyotp(req: Request, res: Response, next: NextFunction): Promise<void> {
-        const { otp, emaildata } = req.body;
-        
         try {
-            const bytes = CryptoJS.AES.decrypt(emaildata, "emailsecret");
+            const { otp, emaildata } = req.body;
+            
+            const decodedEmail = decodeURIComponent(emaildata); 
+            const bytes = CryptoJS.AES.decrypt(decodedEmail, "emailsecret");
             const email = bytes.toString(CryptoJS.enc.Utf8);
     
     
@@ -44,7 +45,7 @@ export class EntrepreneurController {
                 throw new Error("Failed to decrypt email or email is empty.");
             }
     
-            const response = await this.verifyotpusecase.execute(otp, email);
+            const response = await this.verifyotpusecase.execute(Number(otp), email);
     
             if (response.success) {
                 res.cookie('userToken', response.token, {

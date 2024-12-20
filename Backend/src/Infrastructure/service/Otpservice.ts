@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { genarateOtp } from "../../Infrastructure";
-
+import Entrepreneurmodel from '../Database/Model/Entrepreneurmodel';
 export class OtpService {
     private transporter = nodemailer.createTransport({
         service: "gmail",
@@ -9,8 +9,6 @@ export class OtpService {
             pass: process.env.APP_PASS
         }
     });
-
-    private otpStorage = new Map<string, number>(); // Temporary in-memory OTP storage
 
     generateOtp(): number {
         return genarateOtp();
@@ -30,18 +28,36 @@ export class OtpService {
         await this.transporter.sendMail(mailOptions);
     }
 
-    // Add the `verifyOtp` method
     async verifyOtp(email: string, otp: number): Promise<boolean> {
-        const storedOtp = this.otpStorage.get(email);
-        if (storedOtp && storedOtp === otp) {
-            this.otpStorage.delete(email); // Remove OTP after verification
-            return true;
-        }
-        return false;
-    }
+        try {
+            // Fetch the most recent OTP record for the provided email
+            const otpRecord = await Entrepreneurmodel.findOne({ email }).sort({ createdAt: -1 }).exec();
 
-    // Add method to save OTP for verification
-    saveOtp(email: string, otp: number): void {
-        this.otpStorage.set(email, otp);
+            console.log(typeof otpRecord?.otp,typeof otp)
+    
+            if (!otpRecord) {
+                console.error('No OTP record found for this email');
+                return false;
+            }
+    
+            if (otpRecord.otp === otp) {
+                console.log("matched")
+                await Entrepreneurmodel.updateOne(
+                    { email }, 
+                    { $set: { tempreg: false, is_verified: true } } 
+                );
+                return true;
+            }
+    
+            console.error('OTP does not match');
+            return false;
+        } catch (error) {
+            console.error("Error verifying OTP:", error);
+            return false;
+        }
     }
+    
+
+   
+
 }
