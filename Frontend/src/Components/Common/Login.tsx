@@ -1,16 +1,65 @@
 import { useLocation } from "react-router-dom";
-import React from "react";
+import React,{useEffect,useRef,useState} from "react";
 import Navbar from "../Layout/Navbar"; 
 import Registerimg from "../Layout/Image/Registerimg.png"; 
 import logo from "../Layout/Image/logo.jpeg"; 
 import Glogo from "../Layout/Image/Glogo.png"; 
 import Register from "./Register";
+import { Link } from "react-router-dom";
+import {useSelector} from "react-redux"
+import {RootState} from '../../Redux/Store'
+import axios from "axios";
+import EntrepreneurProfile from "../Entreprenuer/EntrepreneurProfile";
 
 
 const Login: React.FC = () => {
   const location = useLocation();
   const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
+  const { UserAccessToken } = useSelector((state: RootState) => state.token);
 
+const emailRef = useRef<HTMLInputElement>(null);
+const passwordRef = useRef<HTMLInputElement>(null);
+
+
+const [emailError,setEmailError] = useState("");
+const [passwordError,setPasswordError] = useState("");
+
+
+
+
+  useEffect(() => {
+    console.log(UserAccessToken, "token from Redux store");
+    const value = localStorage.getItem("usertoken");
+    console.log("token from localStorage", value);
+  }, [UserAccessToken]);
+  
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>)=>{
+    e.preventDefault();
+
+    setEmailError("");
+    setPasswordError("");
+
+    if(!emailRef.current || !passwordRef.current){
+      console.error("refs are not initialized");
+      return 
+    }
+
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
+
+    const response = await axios.post(`http://localhost:3009/api/${userType}/login`,{
+      email:email,password:password,
+      Headers:{
+        "Content-Type" : "application/json"
+      }
+    })
+
+    console.log(response,"here is the resposnse")
+    if(response){
+      console.log(response.data.token)
+    }
+  }
 
   return (
     <>
@@ -52,13 +101,15 @@ const Login: React.FC = () => {
               <img src={Glogo} alt="Google logo" className="w-5 h-5 mr-2" />
               CONTINUE WITH GOOGLE
             </button>
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleLogin}>
               <input
+                ref={emailRef}
                 type="email"
                 placeholder="Email"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
               />
               <input
+              ref={passwordRef}
                 type="password"
                 placeholder="Password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-indigo-300"
@@ -73,13 +124,14 @@ const Login: React.FC = () => {
             </form>
             <p className="text-center text-sm text-gray-600 mt-6">
               If you don't have an account?{" "}
-              <a href={`/${userType}/register`} className="font-semibold hover:underline" style={{ color: "#00186E" }}>
-                REGISTER
-              </a>
+              <Link to={`/${userType}/register`} className="font-semibold hover:underline" style={{ color: "#00186E" }}>
+             Register
+            </Link>
             </p>
           </div>
         </div>
       </div>
+      <EntrepreneurProfile/>
     </>
   );
 };

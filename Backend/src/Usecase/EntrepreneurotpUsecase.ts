@@ -12,7 +12,7 @@ class ApplicationError extends Error {
 export class VerifyOtpUsecase {
   constructor(
     private entrepreneurRepository: IEntrepreneurRepository,
-    private OtpSevice: { verifyOtp: (email: string, otp: number) => Promise<boolean> } 
+    private OtpSevice: { verifyOtp: (email: string, otp: number,user:string) => Promise<boolean> } 
   ) {}
 
   
@@ -27,12 +27,13 @@ export class VerifyOtpUsecase {
     if (!otp || !email) {
       throw new ApplicationError("OTP and email are required", 400);
     }
-
-    const isOtpValid = await this.OtpSevice.verifyOtp(email, otp);
+     const user = "Entrepreneur"
+    const isOtpValid = await this.OtpSevice.verifyOtp(email, otp,user);
     if (!isOtpValid) {
       throw new ApplicationError("Invalid or expired OTP", 401);
     }
 
+    
     const entrepreneur = await this.entrepreneurRepository.findbyEmail(email);
     if (!entrepreneur || !entrepreneur._id) {
       throw new ApplicationError("No user found or invalid user data", 404);
@@ -43,6 +44,7 @@ export class VerifyOtpUsecase {
     const tokenPayload = { id: entrepreneur._id.toString(), email };
     const token = generateToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
+    
 
 
     console.log(token,refreshToken,"opopoppopo")

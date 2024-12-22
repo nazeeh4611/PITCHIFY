@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface NavbarProps {
   logoUrl: string;
@@ -22,9 +23,9 @@ const Navbar: React.FC<NavbarProps> = ({ logoUrl, links }) => {
         {/* Navigation Links Container */}
         <div className="hidden lg:flex bg-white shadow-lg rounded-full px-6 py-2 items-center space-x-6">
           {links.map((link, index) => (
-            <a
+            <Link
               key={index}
-              href={link.href}
+              to={link.href}
               className={`${
                 link.label === "Login"
                   ? "px-4 py-2 bg-indigo-900 text-white rounded-full hover:bg-indigo-700"
@@ -32,7 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ logoUrl, links }) => {
               }`}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -62,13 +63,13 @@ const Navbar: React.FC<NavbarProps> = ({ logoUrl, links }) => {
       {isMenuOpen && (
         <div className="lg:hidden bg-white shadow-lg rounded-lg px-6 py-4 space-y-4">
           {links.map((link, index) => (
-            <a
+            <Link
               key={index}
-              href={link.href}
+              to={link.href}
               className="text-black text-sm font-medium hover:text-indigo-600"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}

@@ -7,6 +7,7 @@ import Glogo from "../Layout/Image/Glogo.png";
 import axios from "axios"; 
 import Otp from "./OTP";
 import * as CryptoJS from 'crypto-js';
+import { Link } from "react-router-dom";
 
 
 
@@ -44,8 +45,9 @@ const Register: React.FC = () => {
       console.error("Refs are not initialized");
       return;
     }
-    const encryptedEmail = CryptoJS.AES.encrypt(emailref.current.value, "emailsecret").toString();
-    console.log("Encrypted Email:", encryptedEmail);
+    // const encryptedEmail = CryptoJS.AES.encrypt(emailref.current.value, "emailsecret").toString();
+    const email = emailref.current.value
+    console.log("Encrypted Email:", email);
     
     try {
       const formData = new FormData();
@@ -67,7 +69,7 @@ const Register: React.FC = () => {
       });
       console.log("Registration successful:", response.data);
        if(response){
-        navigate(`/${userType}/otp?email=${encryptedEmail}`)
+        navigate(`/${userType}/otp?email=${email}`)
       }
     } catch (error) {
       console.error("Registration failed:", error);
@@ -173,13 +175,13 @@ const Register: React.FC = () => {
             </form>
             <p className="text-center text-sm text-gray-600 mt-4">
               If you already have an account?{" "}
-              <a
-                href={`/${userType}/login`} // Dynamic link based on user type
+              <Link
+                to={`/${userType}/login`} // Dynamic link based on user type
                 className="font-semibold hover:underline"
                 style={{ color: "#00186E" }}
               >
                 LOGIN
-              </a>
+             </Link>
             </p>
           </div>
         </div>

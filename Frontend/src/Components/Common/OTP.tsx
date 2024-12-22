@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Registerimg from "../Layout/Image/Registerimg.png";
 import { useLocation,useNavigate,useSearchParams } from "react-router-dom";
 import axios from "axios";
+import {useDispatch} from "react-redux"
+import {addToken} from "../../Redux/TokenSlice"
 
 interface OtpInputProps {
   length?: number; // Default OTP length: 4
@@ -11,9 +13,12 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
   const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
   const queryParams = new URLSearchParams(location.search);
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const [otp, setOtp] = useState<string[]>(new Array(length).fill(""));
   const [timer, setTimer] = useState<number>(30);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+
 
   // Timer Countdown Effect
   useEffect(() => {
@@ -42,28 +47,40 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const query = queryParams.get('email'); 
-      const entredotp = otp.join("");
+      const query = queryParams.get("email");
+      const enteredOtp = otp.join("");
       const response = await axios.post(
         `http://localhost:3009/api/${userType}/verifyotp`,
-        { otp: entredotp,emaildata:query },
+        { otp: enteredOtp, emaildata: query },
         {
           headers: {
-            'Content-Type': 'application/json',
-          }
-                }
+            "Content-Type": "application/json",
+          },
+        }
       );
-      console.log(response, "this be the response");
-      if(response)
-{
-   navigate(`/${userType}/login`)
-}    } catch (error) {
-      console.error(error);
+  
+      if (response && response.data.token) {
+        console.log(response.data.token, "this is the token");
+  
+        // Dispatch token to Redux
+        dispatch(
+          addToken({
+            token: response.data.token,
+            isVerifiedUser: true,
+          })
+        );
+  
+        // Navigate to the login page
+        navigate(`/${userType}/login`);
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
     }
-  } 
+  };
+  
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-2 sm:p-4 relative">
       <div

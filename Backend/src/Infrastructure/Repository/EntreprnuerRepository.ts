@@ -12,7 +12,7 @@ export class entrepreneurRepository implements IEntrepreneurRepository{
     }
     async  getbyId(id: string): Promise<IEntrepreneurdata | null> {
         try {
-            return await Entrepreneurmodel.findOne({_id:id})
+            return await Entrepreneurmodel.findOne({_id:id}) 
         } catch (error) {
             throw new Error("error in db")
 

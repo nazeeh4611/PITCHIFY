@@ -1,6 +1,6 @@
 import { Types ,ObjectId} from 'mongoose';
 
-export interface IEntrepreneurdata {
+export interface IInvestordata {
   _id: Types.ObjectId; // Ensure `_id` is required
   firstname: string;
   lastname: string;
@@ -11,10 +11,11 @@ export interface IEntrepreneurdata {
   is_Blocked: boolean;
   is_verified: boolean;
   is_Admin: boolean;
-  otp:number 
+  otp:number;
+  tempreg:boolean;
+}
 
-
-export class Entrepreneur implements IEntrepreneurdata {
+export class Investor implements IInvestordata {
   _id: Types.ObjectId; // `_id` is now required here
   firstname: string;
   lastname: string;
@@ -25,10 +26,12 @@ export class Entrepreneur implements IEntrepreneurdata {
   is_Blocked: boolean;
   is_verified: boolean;
   is_Admin: boolean;
+  otp: number;
+  tempreg: boolean;
 
-  constructor(data: Partial<IEntrepreneurdata>) {
+  constructor(data: Partial<IInvestordata>) {
     if (!data._id) {
-      throw new Error("Missing `_id` in Entrepreneur data"); // Ensure `_id` is always provided
+      throw new Error("Missing `_id` in Investor data"); // Ensure `_id` is always provided
     }
     this._id = new Types.ObjectId();
     this.firstname = data.firstname!;
@@ -40,9 +43,11 @@ export class Entrepreneur implements IEntrepreneurdata {
     this.is_Admin = data.is_Admin ?? false;
     this.is_verified = data.is_verified ?? false;
     this.is_Blocked = data.is_Blocked ?? false;
+    this.otp = data.otp!;
+    this.tempreg = data.tempreg??true;
   }
 
-  toIEntrepreneurData(): IEntrepreneurdata {
+  toInvestorData(): IInvestordata {
     return {
       _id: this._id,
       firstname: this.firstname,
@@ -54,12 +59,14 @@ export class Entrepreneur implements IEntrepreneurdata {
       is_Admin: this.is_Admin,
       is_verified: this.is_verified,
       is_Blocked: this.is_Blocked,
+      otp:this.otp,
+      tempreg:this.tempreg
     };
   }
 
-  async save(): Promise<Entrepreneur> {
+  async save(): Promise<Investor> {
     // Simulate saving to the database
-    console.log("Entrepreneur saved to database:", this);
+    console.log("Investor saved to database:", this);
     return this;
   }
 }
