@@ -74,7 +74,7 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
         );
   
         // Navigate to the login page
-        navigate(`/${userType}/login`);
+        navigate(`/${userType}/profile`);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);

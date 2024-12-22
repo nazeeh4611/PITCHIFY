@@ -1,7 +1,7 @@
 import React from "react";
 import {Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Entreprenuer from "./Enterprenuer";
-import Investor from "./Investorroutes";
+import Investor from "./Investor";
 import Common from "./Commonroutes";
 import { Provider } from "react-redux";
 import  store  from "../Redux/Store";

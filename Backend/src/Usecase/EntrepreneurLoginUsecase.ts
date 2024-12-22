@@ -35,7 +35,6 @@ async execute(email:string,password:string):Promise<any>{
     const refreshToken = generateRefreshToken(tokenPayload);
     
 
-    console.log(token,"token in usecae")
    return {
     success:true,
     entrepreneur,
@@ -44,5 +43,7 @@ async execute(email:string,password:string):Promise<any>{
    }
 
 }
+
+
 
 }

@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { signupUsecase ,VerifyOtpUsecase,EntrepreneurLoginUsecase} from '../../Usecase'
+import { signupUsecase ,VerifyOtpUsecase,EntrepreneurLoginUsecase,EntrepreneuProfileUsecase} from '../../Usecase'
 
 
 export class EntrepreneurController {
     constructor(
         private signupusecase: signupUsecase,
         private verifyotpusecase: VerifyOtpUsecase,
-        private loginusecase : EntrepreneurLoginUsecase
+        private loginusecase : EntrepreneurLoginUsecase,
+        private profileusecase: EntrepreneuProfileUsecase
     ) {}
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -71,12 +72,10 @@ export class EntrepreneurController {
 
        const response =  await this.loginusecase.execute(email,password)
 
-       console.log(response)
 
        if(response){
 
         const token = response.token
-        console.log(token,"here the tokn")
         res.status(200).json({sucess:true,token})
        }
         
@@ -84,5 +83,32 @@ export class EntrepreneurController {
         
       }
     }
+
+
+    async getProfile(req: Request, res: Response, next: NextFunction): Promise<any> {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ message: "Email is required" });
+            }
+            
+            const response = await this.profileusecase.execute(email);
+            console.log("Response:", response);
+    
+            if (response) {
+                res.status(200).json({
+                    message: "Profile fetched successfully",
+                    entrepreneur: response.entrepreneur,
+                });
+            } else {
+                res.status(404).json({ message: "Profile not found" });
+            }
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+            res.status(500).json({ message: "Internal server error" });
+            next(error);
+        }
+    }
+    
 
 }

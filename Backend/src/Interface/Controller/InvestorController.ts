@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { InvestorSignupusecase } from '../../Usecase/InvestorsignupUsecase';
-import { investorverifyOtpUsecase } from '../../Usecase/InvestorVerifyotp';
+import { InvestorSignupusecase,investorverifyOtpUsecase,InvestorLoginUsecase,InvestorProfileUsecas} from '../../Usecase'
 import * as CryptoJS from 'crypto-js';
 import { generateRefreshToken,generateToken } from '../Middleware/tokenauth';
 import  jwt,{ JwtPayload } from 'jsonwebtoken';
@@ -13,6 +12,8 @@ export class InvestorController{
     constructor(
         private signupusecase:InvestorSignupusecase,
         private verifyotpusecase:investorverifyOtpUsecase,
+        private loginusecase:InvestorLoginUsecase,
+        private profileusecase:InvestorProfileUsecas
         ){
             const secret = process.env.JWT_SECRET
             const refreshSecret = process.env.JWT_REFRESHSECRET
@@ -112,5 +113,51 @@ export class InvestorController{
         }
     }
 
+
+    async login(
+        req:Request,
+        res:Response,
+        next:NextFunction
+    ):Promise<void>{
+
+        try {
+            const {email,password} = req.body
+            const response = await this.loginusecase.execute(email,password)
+
+            if(response){
+                const token = response.token
+                res.status(200).json({success:true,message:"login verified",token})
+            }
+            
+        } catch (error) {
+            
+        }
+    }
+
+    async getProfile(req: Request, res: Response, next: NextFunction): Promise<any> {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ message: "Email is required" });
+            }
+            
+            const response = await this.profileusecase.execute(email);
     
+            if (response) {
+                console.log(response,"here the respons")
+                res.status(200).json({
+                    message: "Profile fetched successfully",
+                    investor: response,
+                });
+            } else {
+                res.status(404).json({ message: "Profile not found" });
+            }
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+            res.status(500).json({ message: "Internal server error" });
+            next(error);
+        }
+    }
+    
+
 }

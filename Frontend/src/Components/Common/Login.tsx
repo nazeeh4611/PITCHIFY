@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import React,{useEffect,useRef,useState} from "react";
 import Navbar from "../Layout/Navbar"; 
 import Registerimg from "../Layout/Image/Registerimg.png"; 
@@ -6,11 +6,12 @@ import logo from "../Layout/Image/logo.jpeg";
 import Glogo from "../Layout/Image/Glogo.png"; 
 import Register from "./Register";
 import { Link } from "react-router-dom";
-import {useSelector} from "react-redux"
+import {useDispatch, useSelector} from "react-redux"
 import {RootState} from '../../Redux/Store'
 import axios from "axios";
-import EntrepreneurProfile from "../Entreprenuer/EntrepreneurProfile";
-
+import EntrepreneurProfile from "../Entrepreneur/EntrepreneurProfile";
+import { addToken } from "../../Redux/TokenSlice";
+import { UseDispatch } from "react-redux";
 
 const Login: React.FC = () => {
   const location = useLocation();
@@ -23,7 +24,8 @@ const passwordRef = useRef<HTMLInputElement>(null);
 
 const [emailError,setEmailError] = useState("");
 const [passwordError,setPasswordError] = useState("");
-
+const dispatch = useDispatch()
+const navigate = useNavigate()
 
 
 
@@ -36,7 +38,8 @@ const [passwordError,setPasswordError] = useState("");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
-
+   try {
+    
     setEmailError("");
     setPasswordError("");
 
@@ -56,11 +59,25 @@ const [passwordError,setPasswordError] = useState("");
     })
 
     console.log(response,"here is the resposnse")
-    if(response){
-      console.log(response.data.token)
-    }
-  }
+    if (response && response.data.token) {
+      console.log(response.data.token, "this is the token");
 
+      // Dispatch token to Redux
+      dispatch(
+        addToken({
+          token: response.data.token,
+          isVerifiedUser: true,
+        })
+      );
+
+      // Navigate to the login page
+      navigate(`/${userType}/profile`);
+    }
+  } catch (error) {
+    console.error("error")
+   }
+
+  }
   return (
     <>
       <Navbar
@@ -131,7 +148,6 @@ const [passwordError,setPasswordError] = useState("");
           </div>
         </div>
       </div>
-      <EntrepreneurProfile/>
     </>
   );
 };

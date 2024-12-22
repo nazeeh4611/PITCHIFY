@@ -2,7 +2,7 @@
 export * from "./EntrepreneurLoginUsecase"
 export * from "./EntrepreneurotpUsecase"
 export * from "./EntrepreneursignupUsecase"
-
+export * from "./EntrepreneurProfileUsecase"
 
 
 
@@ -14,3 +14,6 @@ export * from "./EntrepreneursignupUsecase"
 
 export * from "./InvestorVerifyotp"
 export * from "./InvestorsignupUsecase"
+export * from "./InvestorLoginUsecase"
+export * from "./InvestorProfileUsecase"
+
