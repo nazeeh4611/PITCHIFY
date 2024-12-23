@@ -55,7 +55,7 @@ const InvestorProfile = () => {
       if (response.data.investor.Investor) {
           console.log(response.data.investor.Investor.firstname,"uheuweuhge")
 
-        setProfile(response.data.investor.Investor); // save investor profile data
+        setProfile(response.data.investor.Investor); 
       } else {
         setError("Unexpected response structure.");
       }

@@ -12,6 +12,7 @@ import axios from "axios";
 import EntrepreneurProfile from "../Entrepreneur/EntrepreneurProfile";
 import { addToken } from "../../Redux/TokenSlice";
 import { UseDispatch } from "react-redux";
+import InvestorList from "../Admin/InvestorList";
 
 const Login: React.FC = () => {
   const location = useLocation();

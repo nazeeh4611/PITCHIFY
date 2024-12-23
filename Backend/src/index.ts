@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from "cookie-parser"
 import { entrepreneurrouter } from "./Interface/Route/EntrepreneurRoute";
 import {InvestorRouter} from "./Interface/Route/InvestorRoute";
+import {AdminRouter} from "./Interface/Route/AdminRoute"
 import dotenv from 'dotenv';
 import {connectDB} from './Infrastructure/Database/Connection/Db'
 dotenv.config();
@@ -33,6 +34,9 @@ app.use("/api/entrepreneur",entrepreneurrouter)
 
 // InvestorRoute
 app.use("/api/investor",InvestorRouter)
+
+// AdminRoute
+app.use("/api/admin",AdminRouter)
 
 app.listen(PORT,()=>{
     console.log(`server is running at http://localhost:${PORT}`)

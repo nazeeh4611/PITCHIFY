@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
-import { genarateOtp } from "../../Infrastructure";
+import { genarateOtp } from "..";
 import Entrepreneurmodel from '../Database/Model/Entrepreneurmodel';
-import InvestorModel from '../Database/Model/Investormodel';
+import {investorModel} from '../Database/Model/Investormodel';
 export class OtpService {
     private transporter = nodemailer.createTransport({
         service: "gmail",
@@ -49,7 +49,7 @@ export class OtpService {
                 console.error('OTP does not match');
                 return false;
             } else if (user === "Investor") {
-                const otpRecord = await InvestorModel.findOne({ email }).sort({ createdAt: -1 }).exec();
+                const otpRecord = await investorModel.findOne({ email }).sort({ createdAt: -1 }).exec();
                 if (!otpRecord) {
                     console.error('No OTP record found for this email');
                     return false;
@@ -57,7 +57,7 @@ export class OtpService {
     
                 if (otpRecord.otp === otp) {
                     console.log("matched");
-                    await InvestorModel.updateOne(
+                    await investorModel.updateOne(
                         { email },
                         { $set: { tempreg: false, is_verified: true } }
                     );

@@ -5,6 +5,7 @@ import Investor from "./Investor";
 import Common from "./Commonroutes";
 import { Provider } from "react-redux";
 import  store  from "../Redux/Store";
+import Admin from "./Admin";
 
 const Approutes:React.FC = ()=>{
 
@@ -15,6 +16,7 @@ const Approutes:React.FC = ()=>{
                 <Route path="/*" element={<Common/>}/>
                 <Route path="/entrepreneur/*" element={<Entreprenuer/>} />
                 <Route path="/investor/*" element={<Investor/>} />
+                <Route path="/admin/*" element={<Admin/>} />
             </Routes>
         </Router>
         </Provider>

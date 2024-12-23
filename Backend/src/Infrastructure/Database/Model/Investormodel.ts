@@ -37,4 +37,5 @@ const InvestorSchema = new Schema<IInvestordata>(
 
 );
 
-export default model<IInvestordata>("Investor",InvestorSchema)
+
+export const investorModel = model<IInvestordata>("Investor",InvestorSchema)

@@ -17,3 +17,13 @@ export * from "./InvestorsignupUsecase"
 export * from "./InvestorLoginUsecase"
 export * from "./InvestorProfileUsecase"
 
+
+
+// Admin Usecases
+
+export * from "./AdminLoginUsecase"
+export * from "./GetEntrepreneurUsecase"
+export * from "./GetInvestorUsecase"
+
+
+
