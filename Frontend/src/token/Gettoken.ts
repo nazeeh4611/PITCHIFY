@@ -1,20 +1,20 @@
-import { UseSelector, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../Redux/Store";
 import ExtractToken from "./ExtractToken";
 
-
-
-export const useGetToken = (name:string) =>{
+export const useGetToken = (name: "entrepreneur" | "investor" | "admin") => {
     try {
-        const { UserAccessToken } = useSelector((state: RootState) => state.token);
+        // Access the Redux state dynamically based on the name
+        const token = useSelector((state: RootState) => 
+            state[name]?.[`${name.charAt(0).toUpperCase() + name.slice(1)}AccessToken`]
+        );
 
-        const token = UserAccessToken
-        if(token){
-            const userDetail = ExtractToken(token)
-            return userDetail
+        if (token) {
+            const userDetail = ExtractToken(token);
+            return userDetail;
         }
     } catch (error) {
-        console.error("error occured while getting token")
-        return null
+        console.error("Error occurred while getting token:", error);
+        return null;
     }
-}
+};

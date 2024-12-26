@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import { useGetToken } from "../../token/Gettoken";
 
 interface ProtectedRouteProps {
-    component: React.ComponentType<any>;  // Allow any component type (React.FC or class component)
+    component: React.ComponentType; 
 }
 
 const EntrepreneurProtectedRoute: React.FC<ProtectedRouteProps> = ({
     component: Component,
 }) => {
   const navigate = useNavigate();
-  const token = useGetToken("token");
+  const token = useGetToken("entrepreneur");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
@@ -22,7 +22,10 @@ const EntrepreneurProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
     setIsAuthenticated(true);
   }, [navigate, token]);
-
+ 
+if(!isAuthenticated){
+  navigate("/")
+}
   return isAuthenticated ? <Component /> : null;
 };
 

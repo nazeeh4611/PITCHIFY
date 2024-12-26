@@ -53,8 +53,10 @@ export class InvestorController{
 
     async signup(req:Request,res:Response,next:NextFunction):Promise<void>{
         const { firstname, lastname, phone, email, password, confirmpassword } = req.body;
-        console.log("data is getting in controller",req.body)
 
+        if( !firstname|| !lastname|| !phone|| !email|| !password|| !confirmpassword ){
+            res.status(404).json({success:false,message:"firstname, lastname, phone, email, password, confirmpassword are required"})
+        }
         try {
             const investor = await this.signupusecase.execute(
                 firstname,
@@ -65,13 +67,10 @@ export class InvestorController{
                 confirmpassword,
                 res
             )
-
-           
-
-        
             res.status(200).json({success:true,investor})
         } catch (error) {
             console.log(error)
+            res.status(500).json({sucsess:false,message:"Internal server error"})
             next(error)
         }
     }
@@ -80,12 +79,7 @@ export class InvestorController{
     async verifyOtp(req:Request,res:Response,next:NextFunction):Promise <void>{
         try {
             const {otp,emaildata} = req.body;
-            // console.log("Encoded emaildata received:", emaildata);
-            // console.log("Decoded emaildata (before decryption):", decodeURIComponent(emaildata));
-            
-            // const decodedEmail = decodeURIComponent(emaildata); 
-            // const bytes = CryptoJS.AES.decrypt(decodedEmail, "emailsecret");
-            // const email = bytes.toString(CryptoJS.enc.Utf8);
+
             const email = emaildata;
 
             console.log("hsdsdgashd",email)
@@ -93,22 +87,16 @@ export class InvestorController{
             if(!email){
                 throw new Error("the email is not getting")
             }
-
-
-
             const response = await this.verifyotpusecase.execute(Number(otp),email)
                const token = response.token
                 if(response.success){
-                // res.cookie("InvestorToken",token, {
-                //     maxAge: 3600000,
-                //     httpOnly: true,
-                //     secure:true,
-                //     sameSite: "none"
-                //   });
-
             res.status(200).json({success:true,message:"otp verified",token})
+                }else{
+                    res.status(401).json({success:false,message:"Invalid Otp"})
                 }
         } catch (error) {
+            console.error(error,"Error occured in veryfying otp")
+            res.status(500).json({sucsess:false,message:"Internal server error"})
             throw new Error("Error occured in verifying otp")
         }
     }
@@ -130,7 +118,8 @@ export class InvestorController{
             }
             
         } catch (error) {
-            
+            console.error(error,"Error occured in login")
+            res.status(500).json({sucsess:false,message:"Internal server error"})
         }
     }
 

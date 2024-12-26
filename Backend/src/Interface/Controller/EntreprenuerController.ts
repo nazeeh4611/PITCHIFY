@@ -12,7 +12,10 @@ export class EntrepreneurController {
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
         const { firstname, lastname, phone, email, password, confirmpassword } = req.body;
-
+         
+        if( !firstname|| !lastname|| !phone|| !email|| !password|| !confirmpassword ){
+            res.status(404).json({success:false,message:"firstname, lastname, phone, email, password, confirmpassword are required"})
+        }
 
         try {
             const entrepreneur = await this.signupusecase.execute(
@@ -29,6 +32,7 @@ export class EntrepreneurController {
             
         } catch (error) {
             console.error("Error during signup:", error);
+            res.status(500).json({sucsess:false,message:"Internal server error"})
             next(error);
         }
     }
@@ -36,6 +40,9 @@ export class EntrepreneurController {
     async verifyotp(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { otp, emaildata } = req.body;
+            if(!otp || !emaildata){
+                res.status(400).json({success:false,message:"otp and email required"})
+            }
             
             // const decodedEmail = decodeURIComponent(emaildata); 
             // const bytes = CryptoJS.AES.decrypt(decodedEmail, "emailsecret");
@@ -55,6 +62,7 @@ export class EntrepreneurController {
             }
         } catch (error) {
             console.error("Error during OTP verification:", error);
+            res.status(500).json({sucsess:false,message:"Internal server error"})
             next(error);
         }
     }
@@ -66,9 +74,12 @@ export class EntrepreneurController {
         res:Response,
         next:NextFunction
     ):Promise<void>{
-      const {email,password} = req.body
-
-      try {
+        
+        try {
+          const {email,password} = req.body
+          if(!email || !password){
+            res.status(400).json({success:false,message:"email and password required"})
+          }
 
        const response =  await this.loginusecase.execute(email,password)
 
@@ -80,7 +91,8 @@ export class EntrepreneurController {
        }
         
       } catch (error) {
-        
+        console.error(error,"error occured in login")
+        res.status(500).json({success:false,message:"Internal server error"})
       }
     }
 
@@ -88,13 +100,12 @@ export class EntrepreneurController {
     async getProfile(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
             const { email } = req.body;
+    
             if (!email) {
                 return res.status(400).json({ message: "Email is required" });
             }
             
-            const response = await this.profileusecase.execute(email);
-            console.log("Response:", response);
-    
+            const response = await this.profileusecase.execute(email);    
             if (response) {
                 res.status(200).json({
                     message: "Profile fetched successfully",

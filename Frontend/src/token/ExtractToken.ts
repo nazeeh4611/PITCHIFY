@@ -1,6 +1,6 @@
 import { DecodedToken } from "../Interfacetypes/types";
 import { UseDispatch, useDispatch } from "react-redux";
-import { addToken } from "../Redux/TokenSlice";
+import { addToken } from "../Redux/EntrepreneurTokenSlice";
 const ExtractToken = (token:string):DecodedToken | null =>{
     if(!token){
         console.error("token not provided for the extraction");
