@@ -3,8 +3,8 @@ import Registerimg from "../Layout/Image/Registerimg.png";
 import { useLocation,useNavigate,useSearchParams } from "react-router-dom";
 import axios from "axios";
 import {useDispatch} from "react-redux"
-import {addToken} from "../../Redux/TokenSlice"
-
+import { EntrepreneurAuth } from "../../Redux/EntrepreneurTokenSlice";
+import { InvestorAuth } from "../../Redux/InvestorTokenSlice";
 interface OtpInputProps {
   length?: number; // Default OTP length: 4
 }
@@ -66,12 +66,21 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
         console.log(response.data.token, "this is the token");
   
         // Dispatch token to Redux
-        dispatch(
-          addToken({
-            token: response.data.token,
-            isVerifiedUser: true,
-          })
-        );
+
+        if(userType == "entrepreneur"){
+          dispatch(
+            EntrepreneurAuth({
+              token: response.data.token,
+            })
+          );
+        }else if(userType=="investor"){
+          dispatch(
+            InvestorAuth({
+              token: response.data.token,
+            })
+          );
+        }
+      
   
         // Navigate to the login page
         navigate(`/${userType}/profile`);

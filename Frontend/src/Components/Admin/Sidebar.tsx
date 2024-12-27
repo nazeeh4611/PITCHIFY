@@ -1,58 +1,54 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { TrendingUp, Users, UserCircle, Bookmark } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
-  const navigate = useNavigate(); // Hook for navigation
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleIconClick = (icon: string, path: string) => {
-    setSelectedIcon(icon); // Set the selected icon to change the background
-    navigate(path); // Navigate to the corresponding page
+  const handleIconClick = (path: string) => {
+    navigate(path);
+  };
+
+  const getButtonClass = (path: string) => {
+    return location.pathname === path
+      ? 'bg-white text-[#2D2654]' // active
+      : 'hover:bg-[#3D3464] text-white'; // inactive
   };
 
   return (
-    <div className="w-1/6 bg-[#2D2654] p-4 flex flex-col items-center space-y-6 h-[60vh] mr-4">
-      <div
-        className={`p-2 rounded-lg cursor-pointer ${
-          selectedIcon === 'trending' ? 'bg-white' : 'hover:bg-[#3D3464]'
-        }`}
-        onClick={() => handleIconClick('trending', '/revenue')}
+    <div
+      className="bg-[#2D2654] p-4 rounded-lg shadow-md flex flex-col items-start space-y-6 h-full w-1/4"
+      style={{ minHeight: '80vh' }}
+    >
+      <button
+        className={`w-full flex items-center space-x-4 p-3 rounded-lg ${getButtonClass('/admin/revenue')}`}
+        onClick={() => handleIconClick('/revenue')}
       >
-        <TrendingUp
-          className={`w-5 h-5 ${selectedIcon === 'trending' ? 'text-[#2D2654]' : 'text-white'}`}
-        />
-      </div>
-      <div
-        className={`p-2 rounded-lg cursor-pointer ${
-          selectedIcon === 'users' ? 'bg-white' : 'hover:bg-[#3D3464]'
-        }`}
-        onClick={() => handleIconClick('users', '/admin/investorlist')}
+        <TrendingUp className="w-5 h-5" />
+        <span className="font-medium">Dashboard</span>
+      </button>
+      <button
+        className={`w-full flex items-center space-x-4 p-3 rounded-lg ${getButtonClass('/admin/investorlist')}`}
+        onClick={() => handleIconClick('/admin/investorlist')}
       >
-        <Users
-          className={`w-5 h-5 ${selectedIcon === 'users' ? 'text-[#2D2654]' : 'text-white'}`}
-        />
-      </div>
-      <div
-        className={`p-2 rounded-lg cursor-pointer ${
-          selectedIcon === 'userCircle' ? 'bg-white' : 'hover:bg-[#3D3464]'
-        }`}
-        onClick={() => handleIconClick('userCircle', '/admin/entrepreneurlist')}
+        <Users className="w-5 h-5" />
+        <span className="font-medium">Investor</span>
+      </button>
+      <button
+        className={`w-full flex items-center space-x-4 p-3 rounded-lg ${getButtonClass('/admin/entrepreneurlist')}`}
+        onClick={() => handleIconClick('/admin/entrepreneurlist')}
       >
-        <UserCircle
-          className={`w-5 h-5 ${selectedIcon === 'userCircle' ? 'text-[#2D2654]' : 'text-white'}`}
-        />
-      </div>
-      <div
-        className={`p-2 rounded-lg cursor-pointer ${
-          selectedIcon === 'bookmark' ? 'bg-white' : 'hover:bg-[#3D3464]'
-        }`}
-        onClick={() => handleIconClick('bookmark', '/admin/subscription')}
+        <UserCircle className="w-5 h-5" />
+        <span className="font-medium">Entrepreneur</span>
+      </button>
+      <button
+        className={`w-full flex items-center space-x-4 p-3 rounded-lg ${getButtonClass('/admin/subscription')}`}
+        onClick={() => handleIconClick('/admin/subscription')}
       >
-        <Bookmark
-          className={`w-5 h-5 ${selectedIcon === 'bookmark' ? 'text-[#2D2654]' : 'text-white'}`}
-        />
-      </div>
+        <Bookmark className="w-5 h-5" />
+        <span className="font-medium">Subscription</span>
+      </button>
     </div>
   );
 };

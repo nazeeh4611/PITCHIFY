@@ -10,6 +10,7 @@ export class AdminLoginUsecase {
     ) {}
 
     async execute(email:string,password:string):Promise<any>{
+        console.log(email,password,"email password")
         if(!email || !password){
             return {success:false,message:"email and password required"}
         }

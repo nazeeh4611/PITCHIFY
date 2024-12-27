@@ -9,15 +9,12 @@ import { Link } from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux"
 import {RootState} from '../../Redux/Store'
 import axios from "axios";
-import EntrepreneurProfile from "../Entrepreneur/EntrepreneurProfile";
-import { addToken } from "../../Redux/TokenSlice";
-import { UseDispatch } from "react-redux";
-import InvestorList from "../Admin/InvestorList";
+import { EntrepreneurAuth } from "../../Redux/EntrepreneurTokenSlice";
+import { InvestorAuth } from "../../Redux/InvestorTokenSlice";
 
 const Login: React.FC = () => {
   const location = useLocation();
-  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
-  const { UserAccessToken } = useSelector((state: RootState) => state.token);
+  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; 
 
 const emailRef = useRef<HTMLInputElement>(null);
 const passwordRef = useRef<HTMLInputElement>(null);
@@ -30,11 +27,6 @@ const navigate = useNavigate()
 
 
 
-  useEffect(() => {
-    console.log(UserAccessToken, "token from Redux store");
-    const value = localStorage.getItem("usertoken");
-    console.log("token from localStorage", value);
-  }, [UserAccessToken]);
   
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>)=>{
@@ -59,17 +51,24 @@ const navigate = useNavigate()
       }
     })
 
-    console.log(response,"here is the resposnse")
+    console.log(response.data.token,"here is the resposnse")
     if (response && response.data.token) {
       console.log(response.data.token, "this is the token");
 
       // Dispatch token to Redux
-      dispatch(
-        addToken({
-          token: response.data.token,
-          isVerifiedUser: true,
-        })
-      );
+      if(userType=="entrepreneur"){
+        dispatch(
+          EntrepreneurAuth({
+            token: response.data.token,
+          })
+        );
+      }else if(userType=="investor"){
+        dispatch(
+          InvestorAuth({
+            token:response.data.token
+          })
+        );
+      }
 
       // Navigate to the login page
       navigate(`/${userType}/profile`);

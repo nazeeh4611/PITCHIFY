@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import { useGetToken } from "../../token/Gettoken";
 
 interface ProtectedRouteProps {
-    component: React.ComponentType<any>;  // Allow any component type (React.FC or class component)
+    component: React.ComponentType<any>;  
 }
 
-const investorProtectedRoute: React.FC<ProtectedRouteProps> = ({
+const AdminProtectedRoute: React.FC<ProtectedRouteProps> = ({
     component: Component,
 }) => {
   const navigate = useNavigate();
@@ -28,4 +28,4 @@ const investorProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return isAuthenticated ? <Component /> :null;
 };
 
-export default investorProtectedRoute;
+export default AdminProtectedRoute;

@@ -26,4 +26,27 @@ export class entrepreneurRepository implements IEntrepreneurRepository{
             throw new Error("error occure while save entreprenuer")
         }
     }
+
+    async update(user: Partial<Entrepreneur>): Promise<IEntrepreneurdata> {
+        try {
+            // Update the entrepreneur by their unique email
+            const updatedEntrepreneur = await Entrepreneurmodel.findOneAndUpdate(
+                { email: user.email },  // Using email to find the user
+                { firstname: user.firstname, phone: user.phone },  // Only update the fields provided
+                { new: true }  // To return the updated document
+            );
+    
+            if (!updatedEntrepreneur) {
+                throw new Error("Failed to update entrepreneur: User not found");
+            }
+    
+            return updatedEntrepreneur as IEntrepreneurdata;
+        } catch (error) {
+            console.error("Error while updating entrepreneur:", error);
+            throw new Error("Error occurred while updating entrepreneur");
+        }
+    }
+    
+    
+
 }

@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 
 
 const initialState = {
-    AdminAccessToken: localStorage.getItem("adminToken") || "",
+    AdminAccessToken: localStorage.getItem("admin") || "",
 };
 
 
@@ -15,7 +15,7 @@ const AdminSlice = createSlice({
       AdminAuth: (state, action) => {
         const token = action.payload.token; 
         state.AdminAccessToken = token;
-        localStorage.setItem("adminToken", token); 
+        localStorage.setItem("admin", token); 
       },
     },
   });

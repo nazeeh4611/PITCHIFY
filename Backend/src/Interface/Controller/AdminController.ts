@@ -15,15 +15,14 @@ export class AdminController {
     async adminLogin(req:Request,res:Response,next:NextFunction):Promise<void>{
         try {
             const {email,password} = req.body
-            if(!email || password ){
+            console.log()
+            if(!email || !password ){
                 res.status(400).json({success:false,message:"email and password required"})
                 return
             }
+            console.log(email,"email",password)
             const response = await this.loginusecase.execute(email,password)
-
-            if(response){
-                console.log(response)
-            }
+             console.log(response,"response")
             const token = response.token
             res.status(200).json({success:true,token})
         } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import DashboardPage from './Test';
 
 const AdminLogin: React.FC = () => {
   const emailRef = useRef<HTMLInputElement>(null);
@@ -41,6 +42,7 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
+    <>
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
@@ -88,6 +90,8 @@ const AdminLogin: React.FC = () => {
         </form>
       </div>
     </div>
+    <DashboardPage/>
+   </>
   );
 };
 

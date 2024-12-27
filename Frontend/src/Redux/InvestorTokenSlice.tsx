@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 
 
 const initialState = {
-    InvestorAccessToken:localStorage.getItem("investorToken"||"")
+    InvestorAccessToken:localStorage.getItem("investor"||"")
 }
 
 
@@ -14,7 +14,7 @@ const InvestorSlice = createSlice({
         InvestorAuth: (state, action) => {
         const token = action.payload.token; 
         state.InvestorAccessToken = token;
-        localStorage.setItem("investorToken", token); 
+        localStorage.setItem("investor", token); 
       },
     },
   });

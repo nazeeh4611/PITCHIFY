@@ -3,7 +3,7 @@ export * from "./EntrepreneurLoginUsecase"
 export * from "./EntrepreneurotpUsecase"
 export * from "./EntrepreneursignupUsecase"
 export * from "./EntrepreneurProfileUsecase"
-
+export * from "./EntrepreneurProfileEditUsecase"
 
 
 

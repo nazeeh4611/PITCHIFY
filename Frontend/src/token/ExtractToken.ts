@@ -1,39 +1,45 @@
 import { DecodedToken } from "../Interfacetypes/types";
-import { UseDispatch, useDispatch } from "react-redux";
-import { addToken } from "../Redux/EntrepreneurTokenSlice";
-const ExtractToken = (token:string):DecodedToken | null =>{
-    if(!token){
-        console.error("token not provided for the extraction");
-        return null
+import { useDispatch } from "react-redux";
+import { EntrepreneurAuth } from "../Redux/EntrepreneurTokenSlice"; // Entrepreneur action
+import { AdminAuth } from "../Redux/AdminTokenSlice"; // Admin action
+import { InvestorAuth } from "../Redux/InvestorTokenSlice"; // Investor action
+
+const ExtractToken = (token: string, name: "entrepreneur" | "investor" | "admin"): DecodedToken | null => {
+  if (!token) {
+    console.error("Token not provided for the extraction");
+    return null;
+  }
+
+  try {
+    const dispatch = useDispatch();
+    const tokenpart = token.split(".")[1];
+    if (!tokenpart) {
+      console.error("Invalid token format");
+      return null;
     }
 
-    try {
+    const decodedToken = JSON.parse(atob(tokenpart));
 
-        const dispatch = useDispatch()
-        const tokenpart = token.split(".")[1];
-        if(!tokenpart){
-            console.error("Invalid token format")
-            return null
-        }
+    if (decodedToken.exp * 1000 < Date.now()) {
+      console.log("Token is expired");
 
-        const decodedToken = JSON.parse(atob(tokenpart));
+      // Dispatch the action to reset the token based on the name
+      if (name === "entrepreneur") {
+        dispatch(EntrepreneurAuth({ token: "", isVerifiedUser: false }));
+      } else if (name === "investor") {
+        dispatch(InvestorAuth({ token: "", isVerifiedUser: false }));
+      } else if (name === "admin") {
+        dispatch(AdminAuth({ token: "", isVerifiedUser: false }));
+      }
 
-        if(decodedToken.exp * 1000 < Date.now()){
-            console.log("token is expired ");
-            dispatch( dispatch(
-                addToken({
-                  token:"",
-                  isVerifiedUser: false,
-                })
-              ));
-
-              return null
-        }
-        return decodedToken
-    } catch (error) {
-        console.error("error occured while extracting the token")
-        return null
+      return null;
     }
-}
 
-export default ExtractToken
+    return decodedToken;
+  } catch (error) {
+    console.error("Error occurred while extracting the token");
+    return null;
+  }
+};
+
+export default ExtractToken;

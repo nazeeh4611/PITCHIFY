@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit"
 
 
 const initialState = {
-    EntrepreneurAccessToken:localStorage.getItem("entrepreneurToken"||"")
+    EntrepreneurAccessToken:localStorage.getItem("entrepreneur"||"")
 }
 
 
@@ -14,7 +14,7 @@ const EntrepreneurSlice = createSlice({
       EntrepreneurAuth: (state, action) => {
         const token = action.payload.token; 
         state.EntrepreneurAccessToken = token;
-        localStorage.setItem("entrepreneurToken", token); 
+        localStorage.setItem("entrepreneur", token); 
       },
     },
   });

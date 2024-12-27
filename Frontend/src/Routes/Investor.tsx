@@ -5,7 +5,8 @@ import Login from "../Components/Common/Login"
 import Otp from "../Components/Common/OTP"
 import InvestorProfile from "../Components/Investor/InvestorProfile";
 import InvestorProtectedRoute from "./ProtectedRoutes/InvestorProtectedRoute";
-
+import InvestorReverseProtectedRoute from "./ProtectedRoutes/ReverseInvestorProtected"
+import InvestorHome from "../Components/Investor/InvestorHome"
 
 
 
@@ -18,17 +19,19 @@ const Investor: React.FC = ()=>{
 
              <Route
              path="/register"
-             element={<Register/>}
+             element={<InvestorReverseProtectedRoute component={Register}/>}
              /> 
              <Route
              path="/login"
-             element={<Login/>}
+             element={<InvestorReverseProtectedRoute component={Login}/>}
              /> 
 
              <Route path="/otp"
-             element={<Otp/>}
+             element={<InvestorReverseProtectedRoute component={Otp}/>}
              />
-
+              <Route path="/"
+              element={<InvestorProtectedRoute component={InvestorHome}/>}
+              />
        <Route
        path="/profile"
          element={<InvestorProtectedRoute component={InvestorProfile} />}

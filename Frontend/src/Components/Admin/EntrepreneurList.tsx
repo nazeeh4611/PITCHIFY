@@ -15,7 +15,7 @@ const EntrepreneurList: React.FC = () => {
 
       setEntrepreneur(fetchedentrepreneurs);
     } catch (error) {
-      console.error('Error fetching entreprenuer:', error);
+      console.error('Error fetching entrepreneur:', error);
     }
   };
 
@@ -25,57 +25,76 @@ const EntrepreneurList: React.FC = () => {
 
   return (
     <>
-    <Adminnav/>
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 relative">
-      <div
-        className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-10 flex w-full max-w-6xl"
-        style={{
-          minHeight: '80vh',
-          height: 'auto',
-        }}
-      >
-        {/* Sidebar with margin-right */}
-        <Sidebar />
+      <Adminnav />
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+        {/* Main White Background Container */}
+        <div className="bg-white rounded-lg shadow-lg p-4 flex w-full max-w-6xl space-x-6">
+          {/* Sidebar */}
+          <Sidebar />
 
-        {/* Content with overflow-y scroll */}
-        <div className="flex-1 p-4 md:p-8 bg-white rounded-lg shadow-lg overflow-y-auto">
-          <h1 className="text-3xl font-bold text-[#2D2654] mb-8">
-            Entrepreneur List</h1>
+          {/* Entrepreneur List */}
+          <div
+            className="flex-1 bg-white rounded-lg shadow-lg p-6 space-y-4"
+            style={{
+              height: '80vh', // Fixed height for the listing container
+              overflowY: 'auto',
+            }}
+          >
+            {/* Heading */}
+            <div className="bg-indigo-950 text-white rounded-lg px-6 py-3 flex justify-center items-center">
+              <span className="text-lg font-semibold">Entrepreneur List</span>
+            </div>
 
-          <div className="space-y-4">
-            {Entrepreneur.map((Entrepreneur) => (
-              <div
-                key={Entrepreneur._id} // Use _id as the key
-                className="p-4 flex items-center justify-between shadow-md border rounded-xl"
-              >
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={Entrepreneur.imageUrl || 'default-image-url'} // Ensure there's an image URL or use a default one
-                    alt={Entrepreneur.firstname} // Use first name or another relevant field for alt text
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="font-semibold text-lg">{Entrepreneur.firstname} {Entrepreneur.lastname}</h3>
-                    <p className="text-gray-600">{Entrepreneur.email}</p>
+            {/* Listing Container */}
+            <div className="space-y-4">
+              {Entrepreneur.map((entrepreneur) => (
+                <div
+                  key={entrepreneur._id}
+                  className="p-2 flex items-center shadow-md border rounded-lg"
+                  style={{
+                    height: '4rem', // Further reduced height for each item
+                  }}
+                >
+                  {/* Profile Section */}
+                  <div className="flex items-center space-x-3 w-1/3">
+                    {/* Profile Image */}
+                    <img
+                      src={entrepreneur.imageUrl || 'default-image-url'}
+                      alt={entrepreneur.firstname}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    {/* Name */}
+                    <div>
+                      <h3 className="font-medium text-sm">
+                        {entrepreneur.firstname} {entrepreneur.lastname}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Email Section */}
+                  <div className="text-center w-1/3">
+                    <p className="text-gray-600 text-sm">{entrepreneur.email}</p>
+                  </div>
+
+                  {/* Block/Unblock Button */}
+                  <div className="w-1/3 flex justify-end">
+                    <button
+                      className={`px-4 py-1 rounded-lg text-white text-sm font-medium ${
+                        entrepreneur.is_Blocked
+                          ? 'bg-[#B85C38] hover:bg-[#A34D2F]'
+                          : 'bg-[#75B85C] hover:bg-[#64A34D]'
+                      }`}
+                    >
+                      {entrepreneur.is_Blocked ? 'Unblock' : 'Block'}
+                    </button>
                   </div>
                 </div>
-                <button
-                  className={`px-6 py-2 rounded-lg text-white font-medium ${
-                    Entrepreneur.is_Blocked
-                      ? 'bg-[#B85C38] hover:bg-[#A34D2F]'
-                      : 'bg-[#75B85C] hover:bg-[#64A34D]'
-                  }`}
-                >
-                  {Entrepreneur.is_Blocked ? 'Unblock' : 'Block'}
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    
-</>
+    </>
   );
 };
 

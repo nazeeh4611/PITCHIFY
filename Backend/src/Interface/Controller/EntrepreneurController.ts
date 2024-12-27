@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { signupUsecase ,VerifyOtpUsecase,EntrepreneurLoginUsecase,EntrepreneuProfileUsecase} from '../../Usecase'
+import { signupUsecase ,VerifyOtpUsecase,EntrepreneurLoginUsecase,EntrepreneuProfileUsecase,EntreprenuerEditProfileUsecase} from '../../Usecase'
 
 
 export class EntrepreneurController {
@@ -7,7 +7,8 @@ export class EntrepreneurController {
         private signupusecase: signupUsecase,
         private verifyotpusecase: VerifyOtpUsecase,
         private loginusecase : EntrepreneurLoginUsecase,
-        private profileusecase: EntrepreneuProfileUsecase
+        private profileusecase: EntrepreneuProfileUsecase,
+        private editProfileUsecase:EntreprenuerEditProfileUsecase
     ) {}
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -77,6 +78,7 @@ export class EntrepreneurController {
         
         try {
           const {email,password} = req.body
+          console.log(email,password)
           if(!email || !password){
             res.status(400).json({success:false,message:"email and password required"})
           }
@@ -100,6 +102,7 @@ export class EntrepreneurController {
     async getProfile(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
             const { email } = req.body;
+            console.log(email)
     
             if (!email) {
                 return res.status(400).json({ message: "Email is required" });
@@ -120,6 +123,24 @@ export class EntrepreneurController {
             next(error);
         }
     }
+
+
+    async editProfile(req:Request,res:Response,next:NextFunction){
+        try {
+            const updatedProfile = req.body
+
+            const email = updatedProfile.email
+            const phone = updatedProfile.phone
+            const name = updatedProfile.firstname
+            console.log(email,phone,name)
+         const response = await this.editProfileUsecase.execute(email,name,phone)
+           res.status(200).json({success:false,message:"data is updated"})
+        } catch (error) {
+            
+        }
+    }
     
 
 }
+
+

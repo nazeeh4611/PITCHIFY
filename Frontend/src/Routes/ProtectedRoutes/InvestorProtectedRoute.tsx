@@ -1,31 +1,23 @@
-import { useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useGetToken } from "../../token/Gettoken";
 
 interface ProtectedRouteProps {
-    component: React.ComponentType<any>;  // Allow any component type (React.FC or class component)
+  component: React.ComponentType<any>;
 }
 
-const investorProtectedRoute: React.FC<ProtectedRouteProps> = ({
-    component: Component,
+const InvestorProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  component: Component,
 }) => {
-  const navigate = useNavigate();
   const token = useGetToken("investor");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    console.log(token,"token is getting")
+  const location = useLocation();
 
-  useEffect(() => {
-    if (!token) {
-      console.log("No valid token found");
-      navigate("/");
-      return;
-    }
-    setIsAuthenticated(true);
-  }, [navigate, token]);
-
-  if(!isAuthenticated){
-    navigate("/")
-  }
-  return isAuthenticated ? <Component /> :null;
+  return (token? (
+    <Component/>
+  ):(
+    <Navigate to="/login" state={{from:location}} />
+  ))
 };
 
-export default investorProtectedRoute;
+export default InvestorProtectedRoute;

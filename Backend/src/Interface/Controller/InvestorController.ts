@@ -110,9 +110,13 @@ export class InvestorController{
 
         try {
             const {email,password} = req.body
+            if(!email || !password){
+                res.status(400).json({success:false,message:"email and password required"})
+            }
             const response = await this.loginusecase.execute(email,password)
 
             if(response){
+                console.log(response,"this be the respons")
                 const token = response.token
                 res.status(200).json({success:true,message:"login verified",token})
             }

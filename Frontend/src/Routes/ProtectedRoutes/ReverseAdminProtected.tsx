@@ -6,10 +6,10 @@ interface ReverseProtectedRouteProps {
   component: React.ComponentType<any>;
 }
 
-const EntrepreneurReverseProtectedRoute: React.FC<ReverseProtectedRouteProps> = ({
+const AdminReverseProtectedRoute: React.FC<ReverseProtectedRouteProps> = ({
   component: Component,
 }) => {
-  const token = useGetToken("entrepreneur");
+  const token = useGetToken("admin");
   const location = useLocation();
 
   return !token ? (
@@ -19,4 +19,4 @@ const EntrepreneurReverseProtectedRoute: React.FC<ReverseProtectedRouteProps> = 
   );
 };
 
-export default EntrepreneurReverseProtectedRoute;
+export default AdminReverseProtectedRoute;
