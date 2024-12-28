@@ -32,7 +32,7 @@ export class entrepreneurRepository implements IEntrepreneurRepository{
             // Update the entrepreneur by their unique email
             const updatedEntrepreneur = await Entrepreneurmodel.findOneAndUpdate(
                 { email: user.email },  // Using email to find the user
-                { firstname: user.firstname, phone: user.phone },  // Only update the fields provided
+                { firstname: user.firstname,lastname:user.lastname, phone: user.phone },  // Only update the fields provided
                 { new: true }  // To return the updated document
             );
     

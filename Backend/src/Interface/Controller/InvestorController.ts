@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { InvestorSignupusecase,investorverifyOtpUsecase,InvestorLoginUsecase,InvestorProfileUsecas} from '../../Usecase'
+import { InvestorSignupusecase,investorverifyOtpUsecase,InvestorLoginUsecase,InvestorProfileUsecas,InvestorProfileEditUsecase} from '../../Usecase'
 import * as CryptoJS from 'crypto-js';
 import { generateRefreshToken,generateToken } from '../Middleware/tokenauth';
 import  jwt,{ JwtPayload } from 'jsonwebtoken';
@@ -13,7 +13,8 @@ export class InvestorController{
         private signupusecase:InvestorSignupusecase,
         private verifyotpusecase:investorverifyOtpUsecase,
         private loginusecase:InvestorLoginUsecase,
-        private profileusecase:InvestorProfileUsecas
+        private profileusecase:InvestorProfileUsecas,
+        private editprofileusecase:InvestorProfileEditUsecase
         ){
             const secret = process.env.JWT_SECRET
             const refreshSecret = process.env.JWT_REFRESHSECRET
@@ -149,6 +150,25 @@ export class InvestorController{
             console.error("Error fetching profile:", error);
             res.status(500).json({ message: "Internal server error" });
             next(error);
+        }
+    }
+
+
+
+    async editProfile(req:Request,res:Response,next:NextFunction){
+        try {
+            const updatedProfile = req.body
+
+            const email = updatedProfile.email
+            const phone = updatedProfile.phone
+            const fname = updatedProfile.firstname
+            const lname = updatedProfile.lastname
+            console.log(email,phone,fname,lname,"jhsjhjdhj")
+         const response = await this.editprofileusecase.execute(email,fname,lname,phone)
+         console.log(response,"opoppppo")
+           res.status(200).json({success:false,message:"data is updated"})
+        } catch (error) {
+            
         }
     }
     

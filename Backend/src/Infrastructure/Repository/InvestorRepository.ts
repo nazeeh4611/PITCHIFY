@@ -22,4 +22,26 @@ export class InvestorRepository implements IInvestorRepository{
             throw new Error("erro ocuured while save investor")
         }
     }
+
+
+    async update(user: Partial<Investor>): Promise<IInvestordata> {
+        try {
+            // Update the entrepreneur by their unique email
+            const updatedInvestor = await investorModel.findOneAndUpdate(
+                { email: user.email },  // Using email to find the user
+                { firstname: user.firstname,lastname:user.lastname, phone: user.phone },  // Only update the fields provided
+                { new: true }  // To return the updated document
+            );
+    
+            if (!updatedInvestor) {
+                throw new Error("Failed to update investor: User not found");
+            }
+    
+            return updatedInvestor as IInvestordata;
+        } catch (error) {
+            console.error("Error while updating investor:", error);
+            throw new Error("Error occurred while updating investor");
+        }
+    }
+    
 }

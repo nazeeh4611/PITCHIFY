@@ -16,6 +16,7 @@ export * from "./InvestorVerifyotp"
 export * from "./InvestorsignupUsecase"
 export * from "./InvestorLoginUsecase"
 export * from "./InvestorProfileUsecase"
+export * from "./InvestorProfileEditUsecase"
 
 
 

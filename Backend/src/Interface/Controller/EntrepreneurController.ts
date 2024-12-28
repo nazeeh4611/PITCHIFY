@@ -131,9 +131,11 @@ export class EntrepreneurController {
 
             const email = updatedProfile.email
             const phone = updatedProfile.phone
-            const name = updatedProfile.firstname
-            console.log(email,phone,name)
-         const response = await this.editProfileUsecase.execute(email,name,phone)
+            const fname = updatedProfile.firstname
+            const lname = updatedProfile.lastname
+            console.log(email,phone,fname,lname,"jhsjhjdhj")
+         const response = await this.editProfileUsecase.execute(email,fname,lname,phone)
+         console.log(response,"opoppppo")
            res.status(200).json({success:false,message:"data is updated"})
         } catch (error) {
             

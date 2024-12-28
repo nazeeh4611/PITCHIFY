@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { InvestorController } from "../Controller/InvestorController";
-import { InvestorSignupusecase,investorverifyOtpUsecase ,InvestorLoginUsecase,InvestorProfileUsecas} from "../../Usecase"
+import { InvestorSignupusecase,investorverifyOtpUsecase ,InvestorLoginUsecase,InvestorProfileUsecas,InvestorProfileEditUsecase} from "../../Usecase"
 import { OtpService } from "../../Infrastructure/service/Otpservice";
 import { InvestorRepository } from "../../Infrastructure/Repository/InvestorRepository";
 
@@ -13,7 +13,8 @@ const investorverifyOtpUsecaseInstance = new investorverifyOtpUsecase(investorre
 const InvestorsignupUsecaseInstance = new InvestorSignupusecase(investorrepositoryInstance,OtpServiceInstance);
 const InvestorLoginUsecaseInstance = new InvestorLoginUsecase(investorrepositoryInstance)
 const InvestorProfileUsecasInstance = new InvestorProfileUsecas(investorrepositoryInstance)
-const InvestoControllerInstance = new InvestorController(InvestorsignupUsecaseInstance,investorverifyOtpUsecaseInstance,InvestorLoginUsecaseInstance,InvestorProfileUsecasInstance)
+const InvestorProfileEditUsecaseInstance = new InvestorProfileEditUsecase(investorrepositoryInstance)
+const InvestoControllerInstance = new InvestorController(InvestorsignupUsecaseInstance,investorverifyOtpUsecaseInstance,InvestorLoginUsecaseInstance,InvestorProfileUsecasInstance,InvestorProfileEditUsecaseInstance)
 
 
 router.post("/register",(req,res,next)=>{
@@ -33,5 +34,8 @@ router.post("/profile",(req,res,next)=>{
     InvestoControllerInstance.getProfile(req,res,next)
 })
 
+router.put("/editprofile",(req,res,next)=>{
+    InvestoControllerInstance.editProfile(req,res,next)
+})
 
 export {router as InvestorRouter}

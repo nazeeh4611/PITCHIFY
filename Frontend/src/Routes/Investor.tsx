@@ -7,6 +7,7 @@ import InvestorProfile from "../Components/Investor/InvestorProfile";
 import InvestorProtectedRoute from "./ProtectedRoutes/InvestorProtectedRoute";
 import InvestorReverseProtectedRoute from "./ProtectedRoutes/ReverseInvestorProtected"
 import InvestorHome from "../Components/Investor/InvestorHome"
+import InvestorDetails from "../Components/Investor/InvestorDetails"
 
 
 
@@ -32,10 +33,15 @@ const Investor: React.FC = ()=>{
               <Route path="/"
               element={<InvestorProtectedRoute component={InvestorHome}/>}
               />
-       <Route
-       path="/profile"
-         element={<InvestorProtectedRoute component={InvestorProfile} />}
-       />
+
+              <Route
+              path="/profile"
+                element={<InvestorProtectedRoute component={InvestorProfile} />}
+              />
+            <Route
+            path="/investordetails"
+              element={<InvestorProtectedRoute component={InvestorDetails} />}
+            />
              
         </Routes>
         </>

@@ -4,10 +4,9 @@ import { IEntrepreneurdata } from "../Domain/entities/entrepreneurentities";
 export class EntreprenuerEditProfileUsecase {
     constructor(private EntrepreneurRepo: IEntrepreneurRepository) {}
 
-    async execute(email: string, firstname: string, phone: number): Promise<IEntrepreneurdata | null> {
+    async execute(email: string, firstname: string,lastname:string, phone: number): Promise<IEntrepreneurdata | null> {
         try {
-            const updatedEntrepreneur = await this.EntrepreneurRepo.update({ email, firstname, phone });
-            console.log("kjkk")
+            const updatedEntrepreneur = await this.EntrepreneurRepo.update({ email, firstname,lastname, phone });
             if (!updatedEntrepreneur) {
                 throw new Error("Entrepreneur not found or update failed");
             }
