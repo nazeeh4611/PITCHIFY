@@ -30,7 +30,7 @@ async execute(email:string,password:string):Promise<any>{
         return {success:false,message:"Invalid pasword"}
     }
 
-    const tokenPayload = { id: entrepreneur._id.toString(), email };
+    const tokenPayload = { id: entrepreneur._id.toString(), email,role:"entrepreneur" };
     const token = generateToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
     

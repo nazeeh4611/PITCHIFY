@@ -42,7 +42,7 @@ export class investorverifyOtpUsecase {
             await investor.save();
 
 
-            const tokenPayload = {id:investor._id.toString(),email}
+            const tokenPayload = {id:investor._id.toString(),email,role:"investor"}
             const token = generateToken(tokenPayload)
             const refreshToken = generateRefreshToken(tokenPayload)
 

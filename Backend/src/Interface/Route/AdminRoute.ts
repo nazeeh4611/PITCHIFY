@@ -3,6 +3,8 @@ import { AdminController } from "../Controller/AdminController";
 import {GetEntrpreneurUsecase,GetInvestorUsecase,AdminLoginUsecase} from "../../Usecase"
 
 import {AdminRepository} from "../../Infrastructure/Repository"
+import authMiddleware from "../Middleware/Auth"; // Import the middleware
+
 
 
 const router = Router();
@@ -19,12 +21,12 @@ router.post("/login",(req,res,next)=>{
 })
 
 
-router.get("/investorlist",(req,res,next)=>{
+router.get("/investorlist",authMiddleware(['admin']),(req,res,next)=>{
     AdminControllerInstance.getInvestor(req,res,next)
 })
 
 
-router.get("/entrepreneurlist",(req,res,next)=>{
+router.get("/entrepreneurlist",authMiddleware(['admin']),(req,res,next)=>{
     AdminControllerInstance.getEntrepreneur(req,res,next)
 })
 

@@ -25,8 +25,9 @@ const InvestorProfile = () => {
   const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; 
 
   const token = useGetToken("investor");
+  console.log(token,"the token")
   const email = token?.email;
-
+console.log(email,"the email")
   const [profile, setProfile] = useState({
     firstname: "",
     lastname: "",

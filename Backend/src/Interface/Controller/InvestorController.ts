@@ -1,10 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import { InvestorSignupusecase,investorverifyOtpUsecase,InvestorLoginUsecase,InvestorProfileUsecas,InvestorProfileEditUsecase} from '../../Usecase'
+import { InvestorSignupusecase,investorverifyOtpUsecase,InvestorLoginUsecase,InvestorProfileUsecas,InvestorProfileEditUsecase,Investorverifyusecase} from '../../Usecase'
 import * as CryptoJS from 'crypto-js';
 import { generateRefreshToken,generateToken } from '../Middleware/tokenauth';
 import  jwt,{ JwtPayload } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config()
+import multer from "multer";
+import fs from 'fs'; 
+
+
+const upload = multer({ dest: 'uploads/' });
+
 
 export class InvestorController{
     private readonly jwtsecret: string
@@ -14,7 +20,9 @@ export class InvestorController{
         private verifyotpusecase:investorverifyOtpUsecase,
         private loginusecase:InvestorLoginUsecase,
         private profileusecase:InvestorProfileUsecas,
-        private editprofileusecase:InvestorProfileEditUsecase
+        private editprofileusecase:InvestorProfileEditUsecase,
+        private verifyusecase:Investorverifyusecase
+        
         ){
             const secret = process.env.JWT_SECRET
             const refreshSecret = process.env.JWT_REFRESHSECRET
@@ -131,6 +139,7 @@ export class InvestorController{
     async getProfile(req: Request, res: Response, next: NextFunction): Promise<any> {
         try {
             const { email } = req.body;
+            console.log(email,"is email")
             if (!email) {
                 return res.status(400).json({ message: "Email is required" });
             }
@@ -163,7 +172,6 @@ export class InvestorController{
             const phone = updatedProfile.phone
             const fname = updatedProfile.firstname
             const lname = updatedProfile.lastname
-            console.log(email,phone,fname,lname,"jhsjhjdhj")
          const response = await this.editprofileusecase.execute(email,fname,lname,phone)
          console.log(response,"opoppppo")
            res.status(200).json({success:false,message:"data is updated"})
@@ -171,6 +179,39 @@ export class InvestorController{
             
         }
     }
+
+    async verifyInvestor(req: Request, res: Response, next: NextFunction) {
+        try {
+        //   const { companyName, email } = req.body;
+        //   const file = req.file;
+        //   console.log("file",file)
+      
+        //   const companydetails = file ? fs.readFileSync(file.path) : null; 
+          
+        //   console.log("companydetails:",typeof companydetails); 
+
+        //   if (!companyName || !email || !file) {
+        //     return res.status(400).json({ message: "Company name, email, and file are required." });
+        //   }
+      
+      
+        //   if (!companydetails) {
+        //     return res.status(400).json({ message: "File content not found." });
+        //   }
+      
+        //   const response = await this.verifyusecase.execute(email, companydetails);
+        //   if (response) {
+        //     return res.status(200).json({ success: true, message: "Investor verified successfully" });
+        //   }
+      
+        //   return res.status(500).json({ message: "Investor verification failed" });
+      
+        } catch (error) {
+          next(error);
+        }
+      }
+      
     
+      
 
 }

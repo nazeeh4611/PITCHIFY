@@ -41,7 +41,7 @@ export class VerifyOtpUsecase {
 
     await entrepreneur.save();
 
-    const tokenPayload = { id: entrepreneur._id.toString(), email };
+    const tokenPayload = { id: entrepreneur._id.toString(), email,role:"entrepreneur" };
     const token = generateToken(tokenPayload);
     const refreshToken = generateRefreshToken(tokenPayload);
     

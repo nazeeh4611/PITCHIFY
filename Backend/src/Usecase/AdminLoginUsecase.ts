@@ -27,7 +27,7 @@ export class AdminLoginUsecase {
                 return {success:false,message:"invalid password"};
             }
 
-            const tokenPayload = { id: admin._id.toString(), email };
+            const tokenPayload = { id: admin._id.toString(), email,role:"admin" };
             const token = generateToken(tokenPayload);
             const refreshToken = generateRefreshToken(tokenPayload);
 

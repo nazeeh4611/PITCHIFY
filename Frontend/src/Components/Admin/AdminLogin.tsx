@@ -2,11 +2,14 @@ import React, { useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import DashboardPage from './Test';
+import { UseDispatch, useDispatch } from 'react-redux';
+import { AdminAuth } from '../../Redux/AdminTokenSlice';
 
 const AdminLogin: React.FC = () => {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const navigate =useNavigate();
+  const dispatch = useDispatch()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -29,9 +32,14 @@ const AdminLogin: React.FC = () => {
         }
       );
 
-      console.log(response);
+      console.log(response.data.token);
 
       if(response){
+        dispatch(
+          AdminAuth({
+            token: response.data.token,
+          })
+        );
       navigate("/admin/investorlist")
       }
 

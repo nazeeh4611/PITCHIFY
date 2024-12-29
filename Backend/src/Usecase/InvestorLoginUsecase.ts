@@ -30,7 +30,7 @@ export class InvestorLoginUsecase {
             return {success:false,message:"Invalid pasword"}
         }
     
-        const tokenPayload = { id: Investor._id.toString(), email };
+        const tokenPayload = { id: Investor._id.toString(), email,role:"investor" };
         const token = generateToken(tokenPayload);
         const refreshToken = generateRefreshToken(tokenPayload);
         

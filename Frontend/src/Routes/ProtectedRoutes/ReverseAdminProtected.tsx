@@ -15,7 +15,7 @@ const AdminReverseProtectedRoute: React.FC<ReverseProtectedRouteProps> = ({
   return !token ? (
     <Component /> 
   ) : (
-    <Navigate to="/" state={{ from: location }} />
+    <Navigate to="/admin/login" state={{ from: location }} />
   );
 };
 

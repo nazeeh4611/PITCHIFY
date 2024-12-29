@@ -1,22 +1,7 @@
-import { Types ,ObjectId} from 'mongoose';
+import { Types, ObjectId } from 'mongoose';
 
 export interface IInvestordata {
-  _id: Types.ObjectId; // Ensure `_id` is required
-  firstname: string;
-  lastname: string;
-  email: string;
-  phone: number;
-  password: string;
-  confirmpassword: string;
-  is_Blocked: boolean;
-  is_verified: boolean;
-  is_Admin: boolean;
-  otp:number;
-  tempreg:boolean;
-}
-
-export class Investor implements IInvestordata {
-  _id: Types.ObjectId; // `_id` is now required here
+  _id: Types.ObjectId;
   firstname: string;
   lastname: string;
   email: string;
@@ -28,6 +13,27 @@ export class Investor implements IInvestordata {
   is_Admin: boolean;
   otp: number;
   tempreg: boolean;
+  companydetails: string;
+  status:string;
+  isApproved:boolean; 
+}
+
+export class Investor implements IInvestordata {
+  _id: Types.ObjectId;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: number;
+  password: string;
+  confirmpassword: string;
+  is_Blocked: boolean;
+  is_verified: boolean;
+  is_Admin: boolean;
+  otp: number;
+  tempreg: boolean;
+  companydetails: string;
+  status:string;
+  isApproved:boolean; 
 
   constructor(data: Partial<IInvestordata>) {
     if (!data._id) {
@@ -44,7 +50,10 @@ export class Investor implements IInvestordata {
     this.is_verified = data.is_verified ?? false;
     this.is_Blocked = data.is_Blocked ?? false;
     this.otp = data.otp!;
-    this.tempreg = data.tempreg??true;
+    this.tempreg = data.tempreg ?? true;
+    this.companydetails = data.companydetails ?? "";
+    this.status = data.status ?? "not appreoved";
+    this.isApproved = data.isApproved ?? false;
   }
 
   toInvestorData(): IInvestordata {
@@ -59,8 +68,11 @@ export class Investor implements IInvestordata {
       is_Admin: this.is_Admin,
       is_verified: this.is_verified,
       is_Blocked: this.is_Blocked,
-      otp:this.otp,
-      tempreg:this.tempreg
+      otp: this.otp,
+      tempreg: this.tempreg,
+      companydetails: this.companydetails,
+      status:this.status,
+      isApproved:this.isApproved // Include companydetails in the returned object
     };
   }
 

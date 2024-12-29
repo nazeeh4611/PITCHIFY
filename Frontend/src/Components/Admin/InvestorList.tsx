@@ -8,17 +8,22 @@ const InvestorList: React.FC = () => {
 
   const getInvestor = async () => {
     try {
-      const response = await axios.get('http://localhost:3009/api/admin/investorlist');
-      console.log(response.data, "here");
-
-      // Ensure response data is an array
+      const api = axios.create({
+        baseURL: 'http://localhost:3009/api',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('admin')}`,
+        },
+      });
+  
+      const response = await api.get('/admin/investorlist'); 
+      console.log(response)
       const fetchedInvestors = Array.isArray(response.data) ? response.data : [response.data];
-
       setInvestors(fetchedInvestors);
     } catch (error) {
       console.error('Error fetching investors:', error);
     }
   };
+  
 
   useEffect(() => {
     getInvestor();

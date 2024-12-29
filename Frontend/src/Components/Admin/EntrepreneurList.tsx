@@ -8,16 +8,21 @@ const EntrepreneurList: React.FC = () => {
 
   const getEntrepreneur = async () => {
     try {
-      const response = await axios.get('http://localhost:3009/api/admin/entrepreneurlist');
-      console.log(response.data, "here");
-
-      const fetchedentrepreneurs = Array.isArray(response.data) ? response.data : [response.data];
-
-      setEntrepreneur(fetchedentrepreneurs);
+      const api = axios.create({
+        baseURL: 'http://localhost:3009/api',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('admin')}`,
+        },
+      });
+  
+      const response = await api.get('/admin/entrepreneurlist'); 
+      console.log(response)
+      const fetchedEntrepreneurs = Array.isArray(response.data) ? response.data : [response.data];
+      setEntrepreneur(fetchedEntrepreneurs);
     } catch (error) {
-      console.error('Error fetching entrepreneur:', error);
+      console.error('Error fetching investors:', error);
     }
-  };
+  }
 
   useEffect(() => {
     getEntrepreneur();
