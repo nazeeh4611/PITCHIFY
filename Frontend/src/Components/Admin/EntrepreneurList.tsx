@@ -5,6 +5,16 @@ import Adminnav from './Adminnav';
 
 const EntrepreneurList: React.FC = () => {
   const [Entrepreneur, setEntrepreneur] = useState<any[]>([]);
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_API_BASE_URL: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 
   const getEntrepreneur = async () => {
     try {
@@ -32,43 +42,35 @@ const EntrepreneurList: React.FC = () => {
     <>
       <Adminnav />
       <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-        {/* Main White Background Container */}
         <div className="bg-white rounded-lg shadow-lg p-4 flex w-full max-w-6xl space-x-6">
-          {/* Sidebar */}
           <Sidebar />
 
-          {/* Entrepreneur List */}
           <div
             className="flex-1 bg-white rounded-lg shadow-lg p-6 space-y-4"
             style={{
-              height: '80vh', // Fixed height for the listing container
+              height: '80vh', 
               overflowY: 'auto',
             }}
           >
-            {/* Heading */}
             <div className="bg-indigo-950 text-white rounded-lg px-6 py-3 flex justify-center items-center">
               <span className="text-lg font-semibold">Entrepreneur List</span>
             </div>
 
-            {/* Listing Container */}
             <div className="space-y-4">
               {Entrepreneur.map((entrepreneur) => (
                 <div
                   key={entrepreneur._id}
                   className="p-2 flex items-center shadow-md border rounded-lg"
                   style={{
-                    height: '4rem', // Further reduced height for each item
+                    height: '4rem', 
                   }}
                 >
-                  {/* Profile Section */}
                   <div className="flex items-center space-x-3 w-1/3">
-                    {/* Profile Image */}
                     <img
                       src={entrepreneur.imageUrl || 'default-image-url'}
                       alt={entrepreneur.firstname}
                       className="w-10 h-10 rounded-full object-cover"
                     />
-                    {/* Name */}
                     <div>
                       <h3 className="font-medium text-sm">
                         {entrepreneur.firstname} {entrepreneur.lastname}
@@ -76,12 +78,10 @@ const EntrepreneurList: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Email Section */}
                   <div className="text-center w-1/3">
                     <p className="text-gray-600 text-sm">{entrepreneur.email}</p>
                   </div>
 
-                  {/* Block/Unblock Button */}
                   <div className="w-1/3 flex justify-end">
                     <button
                       className={`px-4 py-1 rounded-lg text-white text-sm font-medium ${

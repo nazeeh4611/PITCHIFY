@@ -138,7 +138,7 @@ export class EntrepreneurController {
          console.log(response,"opoppppo")
            res.status(200).json({success:false,message:"data is updated"})
         } catch (error) {
-            
+            res.status(500).json({success:false,message:"internal server error"})
         }
     }
     
