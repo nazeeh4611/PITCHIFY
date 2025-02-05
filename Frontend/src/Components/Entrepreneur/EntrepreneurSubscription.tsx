@@ -1,0 +1,149 @@
+import React, { useEffect, useState } from 'react';
+import logo from "../Layout/Image/logo.jpeg";
+import Navbar from '../Layout/Navbar';
+import shortlogo from "../Layout/Image/shortlogo.png";
+import { useNavigate } from 'react-router-dom';
+import { useGetToken } from '../../token/Gettoken';
+import Sidebar from './EntrepreneurSidebar';
+import axios from 'axios';
+import { baseurl } from '../../Constent/regex';
+import EntrepreneurSubscriptionDetails from './EntrepreneurSubscriptionDetails';
+
+const SkeletonLoader = () => (
+  <div className="animate-pulse flex flex-col items-center w-full max-w-xs">
+    <div className="bg-gray-200 rounded-xl w-full p-6">
+      <div className="bg-gray-300 p-4 rounded-lg">
+        <div className="h-6 bg-gray-400 rounded w-1/3 mb-4"></div>
+        <div className="h-4 bg-gray-400 rounded w-1/4 mb-4"></div>
+        <div className="h-8 bg-gray-400 rounded w-2/3 mb-6"></div>
+        <div className="space-y-3">
+          <div className="flex items-center">
+            <div className="h-4 bg-gray-400 rounded w-full"></div>
+          </div>
+          <div className="flex items-center">
+            <div className="h-4 bg-gray-400 rounded w-full"></div>
+          </div>
+          <div className="flex items-center">
+            <div className="h-4 bg-gray-400 rounded w-full"></div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 h-10 bg-gray-300 rounded-lg w-full"></div>
+    </div>
+  </div>
+);
+
+const EntrepreneurSubscription = () => {
+  const token = useGetToken("entrepreneur");
+  const email = token?.email;
+  const api = axios.create({
+    baseURL: baseurl,
+  });
+  const navigate = useNavigate();
+  const [entrepreneurdata, setEntrepreneurdata] = useState<any>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handlepremium = async () => {
+    try {
+      navigate('/entrepreneur/plan-details');
+    } catch (error) {
+      console.error('Error during navigation:', error);
+    }
+  };
+
+  const GetEntrepreneur = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.post("/entrepreneur/profile", { email });
+      const data = response.data.entrepreneur;
+      const premiumPlan = data?.premium || {};
+      const start = premiumPlan.startDate || "";
+      const end = premiumPlan.endDate || "";
+      setEndDate(end);
+      setStartDate(start);
+      setEntrepreneurdata(premiumPlan);
+    } catch (error) {
+      console.error("Error fetching entrepreneur data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    GetEntrepreneur();
+  }, [email]);
+
+  return (
+    <>
+      <Navbar
+        logoUrl={logo}
+        shortLogoUrl={shortlogo}
+        links={[
+          { label: "Home", href: "/entrepreneur" },
+          { label: "About Us", href: "/about-us" },
+        ]}
+      />
+      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 relative">
+        <div
+          className="bg-white rounded-lg shadow-lg p-2 sm:p-4 md:p-6 flex flex-col md:flex-row w-full max-w-sm sm:max-w-md md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
+          style={{
+            minHeight: "80vh",
+            height: "auto",
+            padding: "0.5rem",
+          }}
+        >
+          <div className="md:w-1/4 w-full">
+            <Sidebar onSectionChange={(id) => console.log(id)} />
+          </div>
+
+          <div className="md:w-3/4 w-full p-4">
+            <div className="bg-white border border-gray-300 rounded-lg p-6 h-full">
+              <div className="flex flex-col justify-center items-center h-full">
+                {isLoading ? (
+                  <SkeletonLoader />
+                ) : endDate ? (
+                  <EntrepreneurSubscriptionDetails
+                    entrepreneurdata={entrepreneurdata}
+                    startDate={startDate}
+                    endDate={endDate}
+                  />
+                ) : (
+                  <div className="flex justify-center items-center md:w-3/4 w-full">
+                    <div className="bg-indigo-900 text-white p-6 rounded-xl shadow-lg w-full max-w-xs">
+                      <div className="bg-white text-indigo-900 p-4 rounded-lg">
+                        <h3 className="text-lg font-semibold">Premium</h3>
+                        <p className="text-sm mt-2">Monthly</p>
+                        <p className="text-2xl font-bold mt-4">$19 for 1 month</p>
+                        <ul className="text-sm mt-4 space-y-2">
+                          <li className="flex items-center">
+                            <span className="material-icons text-indigo-900 mr-2">list_alt</span>
+                            30 Days Plan
+                          </li>
+                          <li className="flex items-center">
+                            <span className="material-icons text-indigo-900 mr-2">list_alt</span>
+                            Unlimited model listing
+                          </li>
+                          <li className="flex items-center">
+                            <span className="material-icons text-indigo-900 mr-2">person_add</span>
+                            Directly connect investors
+                          </li>
+                        </ul>
+                      </div>
+                      <button onClick={handlepremium} className="mt-4 bg-white text-indigo-900 font-semibold py-2 px-4 rounded-lg w-full hover:bg-gray-200">
+                        Get Premium
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default EntrepreneurSubscription;

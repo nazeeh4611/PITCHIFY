@@ -1,0 +1,163 @@
+import React from 'react';
+import Hero1 from "../Layout/Image/Hero1.jpeg";
+import Hero2 from "../Layout/Image/Hero2.png";
+import Hero3 from "../Layout/Image/Hero3.png";
+
+const Hero: React.FC = () => {
+  return (
+    <div className="w-full">
+      {/* First part: Heading on the left, Image on the right in a round container */}
+      <div className="flex items-center justify-between py-10 px-4 mt-16 flex-row">
+        <div className="w-full md:w-1/2 mb-6 md:mb-0 flex justify-start">
+        <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold text-left pl-6 mb-6 mt-5 sm:mt-[-50px]">
+  Empowering <br />
+  <span className="pr-4" style={{ color: "#939393" }}>Ideas</span>
+</h1>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-end">
+          <img 
+            src={Hero1} 
+            alt="Hero" 
+            className="rounded-full w-32 h-32 sm:w-48 sm:h-48 md:w-96 md:h-96 lg:w-[700px] lg:h-[700px] object-cover"
+          />
+        </div>
+      </div>
+        <div className="md:mb-0 ">
+        <h3 
+        className="text-lg sm:text-xl md:text-3xl lg:text-5xl xl:text-4xl font-bold text-center mt-10 mb-0 leading-none" >
+        Trusted by visionary entrepreneurs and forward-thinking investors
+        </h3>
+                </div>
+
+<div className="flex items-center justify-between py-0 px-4 flex-row-reverse">
+  <div className="w-full md:w-1/2 mb-6 md:mb-0 flex justify-start">
+    <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-left">
+      Your paragraph content goes here. Explain something interesting in this section.
+    </p>
+  </div>
+  <div className="w-full md:w-1/2 flex justify-start">
+    <img 
+      src={Hero2}
+      alt="Image Left" 
+      className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 lg:w-[750px] lg:h-[750px] object-cover"
+    />
+  </div>
+</div>
+
+
+      {/* Third part: Paragraph on the right, Image on the left */}
+      <div className="flex items-center justify-between py-10 px-4 flex-row">
+        <div className="w-full md:w-1/2 mb-6 md:mb-0 flex justify-start">
+          <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-left">
+            More content here. You can describe something else in this paragraph.
+          </p>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-end">
+          <img 
+            src={Hero3} 
+            alt="Image Right" 
+            className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 lg:w-[750px] lg:h-[750px] object-cover"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Hero;
+
+
+
+
+
+
+
+
+
+\\\\\\\\\
+
+
+
+
+
+
+
+
+
+
+
+
+import React from 'react';
+import Hero1 from "../Layout/Image/Hero1.jpeg";
+import Hero2 from "../Layout/Image/Hero2.png";
+import Hero3 from "../Layout/Image/Hero3.png";
+
+const Hero: React.FC = () => {
+  return (
+    <div className="w-full">
+      {/* First part: Heading on the left, Image on the right in a round container */}
+      <div className="flex items-center justify-between py-10 px-4 mt-16 flex-row">
+        <div className="w-full md:w-1/2 mb-6 md:mb-0 flex justify-start">
+          <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold text-left pl-6 mb-6 mt-5 sm:mt-[-50px]">
+            Empowering <br />
+            <span className="pr-4" style={{ color: "#939393" }}>Ideas</span>
+          </h1>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-end">
+          <img 
+            src={Hero1} 
+            alt="Hero" 
+            className="rounded-full w-40 h-40 sm:w-56 sm:h-56 md:w-96 md:h-96 lg:w-[700px] lg:h-[700px] object-cover"
+          />
+        </div>
+      </div>
+      <div className="md:mb-0">
+        <h3 
+          className="text-lg sm:text-xl md:text-3xl lg:text-5xl xl:text-4xl font-bold text-center mt-10 mb-0 leading-none">
+          Trusted by visionary entrepreneurs and forward-thinking investors
+        </h3>
+      </div>
+
+      {/* Second part: Paragraph on the left, Image on the right */}
+      <div className="flex items-center justify-between py-0 px-4 flex-row-reverse">
+        <div className="w-full md:w-1/2 mb-6 md:mb-0 flex justify-start">
+          <div className="">
+            <div className="w-full">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
+                Utilize Our Platform
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-700 mt-2">
+                Bring your entrepreneurial vision to fruition. Whether you are a startup founder, small business owner, or innovator, we provide the platform to present your concept to motivated investors. Emphasize your goals and connect with those who share your vision. Together, we can transform your idea into reality.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-start">
+          <img 
+            src={Hero2}
+            alt="Image Left" 
+            className="w-40 h-40 sm:w-56 sm:h-56 md:w-80 md:h-80 lg:w-[750px] lg:h-[750px] object-cover"
+          />
+        </div>
+      </div>
+
+      {/* Third part: Paragraph on the left, Image on the right */}
+      <div className="flex items-center justify-between py-10 px-4 flex-row">
+        <div className="w-full md:w-1/2 mb-6 md:mb-0 flex justify-start">
+          <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-left">
+            More content here. You can describe something else in this paragraph.
+          </p>
+        </div>
+        <div className="w-full md:w-1/2 flex justify-end">
+          <img 
+            src={Hero3} 
+            alt="Image Right" 
+            className="w-40 h-40 sm:w-56 sm:h-56 md:w-80 md:h-80 lg:w-[750px] lg:h-[750px] object-cover"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Hero;
