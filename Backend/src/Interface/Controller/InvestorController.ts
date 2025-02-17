@@ -398,7 +398,9 @@ async getMessageReciever(req:Request,res:Response,next:NextFunction):Promise<voi
 
 async getChat(req:Request,res:Response,next:NextFunction):Promise<void>{
     try {
-         const response = await this.getchatsusecase.execute()
+        const id = req.params.id
+        console.log(id)
+         const response = await this.getchatsusecase.execute(id)
 
         //  console.log(response,"get chat controller")
          res.status(200).json({success:true,response})

@@ -16,7 +16,7 @@ export interface IChatRepository {
     ): Promise<IChatData | null>;
     delete(id: Types.ObjectId): Promise<boolean>;
     
-    getAll():Promise<IChatData[] | null>;
+    getAll(id:string):Promise<IChatData[] | null>;
     getChatsByEntrepreneur(entrepreneurId:Types.ObjectId):Promise<IChatData[] | null>
 }
 

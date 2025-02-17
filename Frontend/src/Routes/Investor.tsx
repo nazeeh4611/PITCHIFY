@@ -13,6 +13,8 @@ import ModelDetialsInvestor from "../Components/Investor/InvestorModelDetails"
 import InvestorSubscription from "../Components/Investor/InvestorSubscription"
 import PricingPage from "../Components/Investor/PricingPage"
 import ChatPage from "../Components/Investor/InvestorChat"
+import VideoCallPage from "../Components/Common/VideoCallpage"
+import InvestorVideoCallPage from "../Components/Investor/investorVideocall"
 
 
 
@@ -52,6 +54,8 @@ const Investor: React.FC = ()=>{
              <Route path="/premium" element={<InvestorProtectedRoute component={InvestorSubscription}/>} />
              <Route path="/plan-details" element={<InvestorProtectedRoute component={PricingPage}/>} />
              <Route path="/chat" element={<InvestorProtectedRoute component={ChatPage}/>} />
+             <Route path="/video-call/:roomId" element={<InvestorVideoCallPage />} />
+
         </Routes>
         </>
     )

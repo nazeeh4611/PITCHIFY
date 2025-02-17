@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Video, Search } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
+import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import Navbar from '../Layout/Navbar';
 import shortlogo from "../Layout/Image/shortlogo.png";
 import logo from "../Layout/Image/logo.jpeg";
 import Sidebar from './InvestorSidebar';
-import { Link, useParams } from 'react-router-dom';
-import { io, Socket } from 'socket.io-client';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { baseurl } from '../../Constent/regex';
 import axios from 'axios';
 import { useGetToken } from '../../token/Gettoken';
@@ -26,7 +27,7 @@ interface Chat {
   timestamp: string;
   avatar: string;
   status: 'online' | 'offline';
-  userId: string; // Added to track the user's ID
+  userId: string;
 }
 
 interface Entrepreneur {
@@ -35,17 +36,6 @@ interface Entrepreneur {
   lastname: string;
   email: string;
   premium: any;
-}
-
-interface ChatResponse {
-  _id: string;
-  chatname: string;
-  entrepreneur: Entrepreneur[];
-  investor: any[];
-  latestmessage: any[];
-  relatedModel: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface MessageResponse {
@@ -60,7 +50,10 @@ interface OnlineUsers {
   [key: string]: boolean;
 }
 
+
+
 const ChatPage = () => {
+  const navigate = useNavigate();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
@@ -68,6 +61,8 @@ const ChatPage = () => {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUsers>({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [userName, setUserName] = useState("");
 
   const api = axios.create({
     baseURL: baseurl,
@@ -81,6 +76,24 @@ const ChatPage = () => {
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
+
+  const handleVideoCall = () => {
+    if (!activeChat) return;
+    
+    // Send message with link
+    const videoCallLink = `${window.location.origin}/entrepreneur/video-call/${activeChat}`;
+    const videoMessage = `I've started a video call. Join using this link: ${videoCallLink}`;
+    setMessage(videoMessage);
+    handleSendMessage(videoMessage);
+    
+    // Navigate to video call page
+    navigate(`/investor/video-call/${activeChat}`, {
+      state: {
+        currentUserId: currentUserId,
+        userName: userName || email
+      }
+    });
+  };
 
   const formatDateTime = () => {
     const now = new Date();
@@ -133,6 +146,7 @@ const ChatPage = () => {
       const investor = response.data.investor.Investor;
       const senderId = investor._id;
       setCurrentUserId(senderId);
+      setUserName(`${investor.firstname} ${investor.lastname}`);
     } catch (error) {
       console.error("Error fetching profile data:", error);
     }
@@ -140,7 +154,8 @@ const ChatPage = () => {
 
   const getChat = async () => {
     try {
-      const response = await api.get('/investor/get-chat');
+      const id = currentUserId;
+      const response = await api.get(`/investor/get-chat/${id}`);
       const chatHistory = response.data?.response || [];
       
       if (Array.isArray(chatHistory)) {
@@ -153,9 +168,9 @@ const ChatPage = () => {
           timestamp: chat.latestmessage?.[0]?.createdAt 
             ? formatMessageTime(chat.latestmessage[0].createdAt)
             : formatDateTime().time,
-          avatar: chat.entrepreneur.profile,
+          avatar: chat.entrepreneur.profile || "/api/placeholder/40/40",
           status: 'offline',
-          userId: chat.entrepreneur._id // Store the user's ID
+          userId: chat.entrepreneur._id
         }));
         setChats(formattedChats);
       } else {
@@ -173,14 +188,29 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
-    getChat();
-  }, []);
+    if (currentUserId) {
+      getChat();
+    }
+  }, [currentUserId]);
 
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat);
+      
+      // Get receiver data
+      const chat = chats.find(c => c.id === activeChat);
+      if (chat) {
+        const chatReceiver: Entrepreneur = {
+          _id: chat.userId,
+          firstname: chat.name.split(' ')[0],
+          lastname: chat.name.split(' ')[1] || '',
+          email: '',
+          premium: null
+        };
+        setReceiver(chatReceiver);
+      }
     }
-  }, [activeChat]);
+  }, [activeChat, chats]);
 
   // Socket connection and user status handling
   useEffect(() => {
@@ -256,6 +286,21 @@ const ChatPage = () => {
                 : chat
             )
           );
+          
+          if (data.message.includes('video call')) {
+            const linkMatch = data.message.match(/\/video-call\/([^"'\s]+)/);
+            if (linkMatch && linkMatch[1]) {
+              const extractedChatId = linkMatch[1];
+              if (window.confirm('You received a video call invitation. Would you like to join?')) {
+                navigate(`/investor/video-call/${extractedChatId}`, {
+                  state: {
+                    currentUserId: currentUserId,
+                    userName: userName || email
+                  }
+                });
+              }
+            }
+          }
         }
       });
     }
@@ -265,10 +310,12 @@ const ChatPage = () => {
         socket.off("receive_message");
       }
     };
-  }, [socket, email, activeChat]);
+  }, [socket, email, activeChat, navigate, currentUserId, userName]);
 
-  const handleSendMessage = async () => {
-    if (message.trim() && socket && activeChat && email && !isProcessing) {
+  const handleSendMessage = async (customMessage?: string) => {
+    const messageToSend = customMessage || message;
+    
+    if (messageToSend.trim() && socket && activeChat && email && !isProcessing) {
       try {
         setIsProcessing(true);
         const { time, fullDateTime } = formatDateTime();
@@ -277,7 +324,7 @@ const ChatPage = () => {
           sender: currentUserId,
           email: email,
           chatId: activeChat,
-          message: message.trim(),
+          message: messageToSend.trim(),
           receiverId: receiver?._id,
           timestamp: time,
           createdAt: fullDateTime
@@ -289,7 +336,7 @@ const ChatPage = () => {
           const newMessage: ChatMessage = {
             id: response.data._id || Date.now().toString(),
             sender: currentUserId,
-            message: message.trim(),
+            message: messageToSend.trim(),
             timestamp: time,
             createdAt: fullDateTime,
             avatar: "/api/placeholder/40/40"
@@ -304,7 +351,7 @@ const ChatPage = () => {
           setChats(prevChats =>
             prevChats.map(chat =>
               chat.id === activeChat
-                ? { ...chat, lastMessage: message.trim(), timestamp: time }
+                ? { ...chat, lastMessage: messageToSend.trim(), timestamp: time }
                 : chat
             )
           );
@@ -315,7 +362,9 @@ const ChatPage = () => {
             receiverId: receiver?._id
           });
 
-          setMessage("");
+          if (!customMessage) {
+            setMessage("");
+          }
         }
       } catch (error) {
         console.error("Error sending message:", error);
@@ -324,6 +373,10 @@ const ChatPage = () => {
       }
     }
   };
+
+  const filteredChats = chats.filter(chat =>
+    chat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col h-screen">
@@ -350,13 +403,15 @@ const ChatPage = () => {
                   <input
                     type="text"
                     placeholder="Search..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-[#1e1b4b] text-gray-800"
                   />
                   <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto">
-                {chats.map((chat) => (
+                {filteredChats.map((chat) => (
                   <div
                     key={chat.id}
                     className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 ${
@@ -414,7 +469,10 @@ const ChatPage = () => {
                         </span>
                       </div>
                     </div>
-                    <Video className="h-6 w-6 text-white cursor-pointer" />
+                    <Video 
+                      className="h-6 w-6 text-white cursor-pointer hover:text-gray-300 transition-colors" 
+                      onClick={handleVideoCall}
+                    />
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -434,7 +492,23 @@ const ChatPage = () => {
                                 : 'bg-gray-200'
                             }`}
                           >
-                            <p>{msg.message}</p>
+                            <p>
+                              {msg.message.includes('video call') ? (
+                                <span>
+                                  {msg.message.split('Join using this link: ')[0]}
+                                  Join using this link: <a 
+                                    href={msg.message.split('Join using this link: ')[1]} 
+                                    className={isCurrentUser ? "text-blue-200 underline" : "text-blue-500 underline"}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                  >
+                                    {msg.message.split('Join using this link: ')[1]}
+                                  </a>
+                                </span>
+                              ) : (
+                                msg.message
+                              )}
+                            </p>
                             <span
                               className={`text-xs ${
                                 isCurrentUser ? 'text-gray-300' : 'text-gray-500'
@@ -463,10 +537,11 @@ const ChatPage = () => {
                         }}
                       />
                       <button
-                        onClick={handleSendMessage}
-                        className="p-2 bg-[#1e1b4b] text-white rounded-lg hover:bg-[#29256d] focus:outline-none"
+                        onClick={() => handleSendMessage()}
+                        disabled={isProcessing}
+                        className="p-2 bg-[#1e1b4b] text-white rounded-lg hover:bg-[#29256d] focus:outline-none transition-colors"
                       >
-                        <Send />
+                        <Send className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -484,4 +559,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default ChatPage

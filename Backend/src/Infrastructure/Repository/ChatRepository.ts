@@ -117,22 +117,18 @@ export class ChatRepositoryImpl implements IChatRepository {
         }
     }
 
-    async getAll(): Promise<IChatData[] | null> {
+    async getAll(id:string): Promise<IChatData[] | null> {
         try {
-            const msg = await ChatModel.find()
+            console.log(id,"id in repo")
+            const msg = await ChatModel.find({investor:id})
             .populate("investor")
             .populate("entrepreneur")
             .populate("latestmessage")
             .lean()
             .exec();
 
-            console.log(msg,"in msg repo")
-            return await ChatModel.find()
-                .populate("investor")
-                .populate("entrepreneur")
-                .populate("latestmessage")
-                .lean()
-                .exec();
+            // console.log(msg,"in msg repo")
+            return msg
         } catch (error) {
             console.error("Error fetching all chats:", error);
             return null;

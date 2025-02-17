@@ -159,7 +159,7 @@ router.get(`/get-reciever/:id`,(req,res,next)=>{
   InvestoControllerInstance.getMessageReciever(req,res,next)
 })
 
-router.get("/get-chat",(req,res,next)=>{
+router.get("/get-chat/:id",(req,res,next)=>{
   console.log("this be the equest inside route")
  InvestoControllerInstance.getChat(req,res,next)
 })

@@ -14,6 +14,8 @@ import EntrepreneurSubscription from "../Components/Entrepreneur/EntrepreneurSub
 import EntrepreneurPricingPage from "../Components/Entrepreneur/EntrepreneurPricingPage";
 import Review from "../Components/Entrepreneur/Rate-Review";
 import ChatPage from "../Components/Entrepreneur/EntrepreneurChat";
+import JoinMeeting from "../Components/Common/Joinmeet";
+import VideoCallPage from "../Components/Common/VideoCallpage";
 
 const Entrepreneur: React.FC = () => {
   return (
@@ -31,6 +33,10 @@ const Entrepreneur: React.FC = () => {
         <Route path="/plan-details" element={<EntrepreneurProtectedRoute component={EntrepreneurPricingPage} />} />
         <Route path="/rate-review" element={<EntrepreneurProtectedRoute component={Review}/>}/>
         <Route path="/chat" element={<EntrepreneurProtectedRoute component={ChatPage}/>}/>
+        <Route path="/join-meeting/:roomId" element={<JoinMeeting />} />
+        <Route path="/video-call/:roomId" element={<VideoCallPage />} />
+
+
         </Routes>
     </>
   );

@@ -17,6 +17,7 @@ const Approutes:React.FC = ()=>{
                 <Route path="/entrepreneur/*" element={<Entreprenuer/>} />
                 <Route path="/investor/*" element={<Investor/>} />
                 <Route path="/admin/*" element={<Admin/>} />
+                
             </Routes>
         </Router>
         </Provider>
