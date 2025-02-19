@@ -7,10 +7,10 @@ export class Investorverifyusecase {
     private investorrepository: IInvestorRepository
   ) {}
 
-  async execute(email: string, companydetails: string,status:string): Promise<IInvestordata> {
+  async execute(email: string, companydetails: string,status:string,companyName:string): Promise<IInvestordata> {
     try {
 
-      const verifyinvestor = await this.investorrepository.verifyinvestor(email, companydetails,status);
+      const verifyinvestor = await this.investorrepository.verifyinvestor(email, companydetails,status,companyName);
       if (!verifyinvestor) {
         throw new Error("Failed to find investor with the provided email");
       }

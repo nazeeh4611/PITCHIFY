@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Video, Search } from 'lucide-react';
+import { Send, Video, Search, ExternalLink } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import Navbar from '../Layout/Navbar';
@@ -18,6 +18,8 @@ interface ChatMessage {
   timestamp: string;
   createdAt: string;
   avatar: string;
+  isVideoCall?: boolean;
+  videoLink?: string;
 }
 
 interface Chat {
@@ -50,8 +52,6 @@ interface OnlineUsers {
   [key: string]: boolean;
 }
 
-
-
 const ChatPage = () => {
   const navigate = useNavigate();
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -63,6 +63,8 @@ const ChatPage = () => {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUsers>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [userName, setUserName] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chats, setChats] = useState<Chat[]>([]);
 
   const api = axios.create({
     baseURL: baseurl,
@@ -73,26 +75,34 @@ const ChatPage = () => {
 
   const token = useGetToken("investor");
   const email = token?.email;
-  
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [chats, setChats] = useState<Chat[]>([]);
 
   const handleVideoCall = () => {
     if (!activeChat) return;
-    
-    // Send message with link
     const videoCallLink = `${window.location.origin}/entrepreneur/video-call/${activeChat}`;
-    const videoMessage = `I've started a video call. Join using this link: ${videoCallLink}`;
-    setMessage(videoMessage);
-    handleSendMessage(videoMessage);
+    const videoMessage = `I've started a video call.`;
     
-    // Navigate to video call page
+    // Create special message with video call flag and link
+    handleSendVideoMessage(videoMessage, videoCallLink);
+    
     navigate(`/investor/video-call/${activeChat}`, {
       state: {
         currentUserId: currentUserId,
         userName: userName || email
       }
     });
+  };
+
+  const handleJoinVideoCall = (videoLink: string) => {
+    const linkMatch = videoLink.match(/\/video-call\/([^"'\s]+)/);
+    if (linkMatch && linkMatch[1]) {
+      const extractedChatId = linkMatch[1];
+      navigate(`/investor/video-call/${extractedChatId}`, {
+        state: {
+          currentUserId: currentUserId,
+          userName: userName || email
+        }
+      });
+    }
   };
 
   const formatDateTime = () => {
@@ -112,13 +122,31 @@ const ChatPage = () => {
     try {
       const response = await api.get(`/investor/get-messages/${chatId}`);
       const messageHistory = response.data?.messages || response.data || [];
-      
       if (Array.isArray(messageHistory)) {
         const formattedMessages: ChatMessage[] = messageHistory.map((msg: MessageResponse) => {
-          const senderEmail = msg.sender || msg.sender;
+          // Check if this is a video call message
+          const isVideoCall = msg.content.includes('video call');
+          let videoLink = '';
+          
+          if (isVideoCall) {
+            const linkMatch = msg.content.match(/Join using this link: (.+)/);
+            videoLink = linkMatch ? linkMatch[1] : '';
+            
+            return {
+              id: msg._id,
+              sender: msg.sender,
+              message: "Video Call",
+              timestamp: formatMessageTime(msg.createdAt),
+              createdAt: msg.createdAt,
+              avatar: "/api/placeholder/40/40",
+              isVideoCall: true,
+              videoLink: videoLink
+            };
+          }
+          
           return {
             id: msg._id,
-            sender: senderEmail,
+            sender: msg.sender,
             message: msg.content,
             timestamp: formatMessageTime(msg.createdAt),
             createdAt: msg.createdAt,
@@ -126,9 +154,6 @@ const ChatPage = () => {
           };
         });
         setMessages(formattedMessages);
-      } else {
-        console.error("Message history is not an array:", messageHistory);
-        setMessages([]);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -137,15 +162,11 @@ const ChatPage = () => {
   };
 
   const accessData = async () => {
-    if (!email) {
-      return;
-    }
-
+    if (!email) return;
     try {
       const response = await api.post("/investor/profile", { email });
       const investor = response.data.investor.Investor;
-      const senderId = investor._id;
-      setCurrentUserId(senderId);
+      setCurrentUserId(investor._id);
       setUserName(`${investor.firstname} ${investor.lastname}`);
     } catch (error) {
       console.error("Error fetching profile data:", error);
@@ -154,10 +175,8 @@ const ChatPage = () => {
 
   const getChat = async () => {
     try {
-      const id = currentUserId;
-      const response = await api.get(`/investor/get-chat/${id}`);
+      const response = await api.get(`/investor/get-chat/${currentUserId}`);
       const chatHistory = response.data?.response || [];
-      
       if (Array.isArray(chatHistory)) {
         const formattedChats: Chat[] = chatHistory.map((chat: any) => ({
           id: chat._id,
@@ -169,13 +188,10 @@ const ChatPage = () => {
             ? formatMessageTime(chat.latestmessage[0].createdAt)
             : formatDateTime().time,
           avatar: chat.entrepreneur.profile || "/api/placeholder/40/40",
-          status: 'offline',
+          status: onlineUsers[chat.entrepreneur._id] ? 'online' : 'offline',
           userId: chat.entrepreneur._id
         }));
         setChats(formattedChats);
-      } else {
-        console.error("Chat history is not an array:", chatHistory);
-        setChats([]);
       }
     } catch (error) {
       console.error("Error fetching chats:", error);
@@ -196,8 +212,6 @@ const ChatPage = () => {
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat);
-      
-      // Get receiver data
       const chat = chats.find(c => c.id === activeChat);
       if (chat) {
         const chatReceiver: Entrepreneur = {
@@ -212,52 +226,65 @@ const ChatPage = () => {
     }
   }, [activeChat, chats]);
 
-  // Socket connection and user status handling
   useEffect(() => {
     const newSocket = io("http://localhost:3009");
     setSocket(newSocket);
-
-    // When connected, emit the user's ID
-    newSocket.on('connect', () => {
+  
+    if (currentUserId) {
+      newSocket.emit('setup', currentUserId);
+    }
+  
+    newSocket.on('connected', () => {
+      console.log('Socket connected');
       if (currentUserId) {
-        newSocket.emit('user_connected', { userId: currentUserId });
+        newSocket.emit('join', { userId: currentUserId });
       }
     });
-
-    // Handle online users updates
-    newSocket.on('online_users', (users: string[]) => {
-      const onlineStatus: OnlineUsers = {};
-      users.forEach(userId => {
-        onlineStatus[userId] = true;
-      });
-      setOnlineUsers(onlineStatus);
+  
+    newSocket.on('user_online', (userId: string) => {
+      setOnlineUsers(prev => ({
+        ...prev,
+        [userId]: true
+      }));
       
-      // Update chats with online status
-      setChats(prevChats => 
+      setChats(prevChats =>
         prevChats.map(chat => ({
           ...chat,
-          status: onlineStatus[chat.userId] ? 'online' : 'offline'
+          status: chat.userId === userId ? 'online' : chat.status
         }))
       );
     });
-
-    // Handle user disconnection
-    newSocket.on('user_disconnected', (userId: string) => {
+  
+    newSocket.on('user_offline', (userId: string) => {
       setOnlineUsers(prev => {
         const updated = { ...prev };
         delete updated[userId];
         return updated;
       });
       
-      // Update chat status when user disconnects
-      setChats(prevChats => 
+      setChats(prevChats =>
         prevChats.map(chat => ({
           ...chat,
           status: chat.userId === userId ? 'offline' : chat.status
         }))
       );
     });
-
+  
+    newSocket.on('get_online_users', (users: string[]) => {
+      const onlineStatus: OnlineUsers = {};
+      users.forEach(userId => {
+        onlineStatus[userId] = true;
+      });
+      setOnlineUsers(onlineStatus);
+      
+      setChats(prevChats =>
+        prevChats.map(chat => ({
+          ...chat,
+          status: onlineStatus[chat.userId] ? 'online' : 'offline'
+        }))
+      );
+      
+    });
     return () => {
       if (currentUserId) {
         newSocket.emit('user_disconnected', { userId: currentUserId });
@@ -266,60 +293,71 @@ const ChatPage = () => {
     };
   }, [currentUserId]);
 
-  // Message handling
   useEffect(() => {
     if (socket) {
       socket.removeAllListeners("receive_message");
-      
-      socket.on("receive_message", (data: ChatMessage) => {
+      socket.on("receive_message", (data: any) => {
         if (data.sender !== email) {
-          setMessages(prevMessages => {
-            const messageExists = prevMessages.some(msg => msg.id === data.id);
-            if (messageExists) return prevMessages;
-            return [...prevMessages, data];
-          });
+          // Check if message is a video call
+          if (data.message && data.message.includes('video call')) {
+            const linkMatch = data.message.match(/Join using this link: (.+)/);
+            const videoLink = linkMatch ? linkMatch[1] : '';
+            
+            // Create formatted message with video call flag
+            const formattedMessage: ChatMessage = {
+              id: data.id,
+              sender: data.sender,
+              message: "Video Call",
+              timestamp: data.timestamp,
+              createdAt: data.createdAt,
+              avatar: "/api/placeholder/40/40",
+              isVideoCall: true,
+              videoLink: videoLink
+            };
+            
+            setMessages(prevMessages => {
+              const messageExists = prevMessages.some(msg => msg.id === data.id);
+              if (messageExists) return prevMessages;
+              return [...prevMessages, formattedMessage];
+            });
+            
+            // Popup for incoming video call
+            if (window.confirm('You received a video call invitation. Would you like to join?')) {
+              handleJoinVideoCall(videoLink);
+            }
+          } else {
+            // Regular message handling
+            setMessages(prevMessages => {
+              const messageExists = prevMessages.some(msg => msg.id === data.id);
+              if (messageExists) return prevMessages;
+              return [...prevMessages, data];
+            });
+          }
           
+          // Update chat list
           setChats(prevChats => 
             prevChats.map(chat => 
               chat.id === activeChat 
-                ? { ...chat, lastMessage: data.message, timestamp: data.timestamp }
+                ? { ...chat, lastMessage: data.isVideoCall ? "Video Call" : data.message, timestamp: data.timestamp }
                 : chat
             )
           );
-          
-          if (data.message.includes('video call')) {
-            const linkMatch = data.message.match(/\/video-call\/([^"'\s]+)/);
-            if (linkMatch && linkMatch[1]) {
-              const extractedChatId = linkMatch[1];
-              if (window.confirm('You received a video call invitation. Would you like to join?')) {
-                navigate(`/investor/video-call/${extractedChatId}`, {
-                  state: {
-                    currentUserId: currentUserId,
-                    userName: userName || email
-                  }
-                });
-              }
-            }
-          }
         }
       });
     }
-
     return () => {
       if (socket) {
         socket.off("receive_message");
       }
     };
-  }, [socket, email, activeChat, navigate, currentUserId, userName]);
+  }, [socket, email, activeChat]);
 
   const handleSendMessage = async (customMessage?: string) => {
     const messageToSend = customMessage || message;
-    
     if (messageToSend.trim() && socket && activeChat && email && !isProcessing) {
       try {
         setIsProcessing(true);
         const { time, fullDateTime } = formatDateTime();
-        
         const messageData = {
           sender: currentUserId,
           email: email,
@@ -331,7 +369,6 @@ const ChatPage = () => {
         };
 
         const response = await api.post('/investor/send-message', messageData);
-        
         if (response?.data) {
           const newMessage: ChatMessage = {
             id: response.data._id || Date.now().toString(),
@@ -374,6 +411,66 @@ const ChatPage = () => {
     }
   };
 
+  const handleSendVideoMessage = async (customMessage: string, videoLink: string) => {
+    if (socket && activeChat && email && !isProcessing) {
+      try {
+        setIsProcessing(true);
+        const { time, fullDateTime } = formatDateTime();
+        // Send actual message with hidden link to backend
+        const actualMessage = `${customMessage} Join using this link: ${videoLink}`;
+        const messageData = {
+          sender: currentUserId,
+          email: email,
+          chatId: activeChat,
+          message: actualMessage,
+          receiverId: receiver?._id,
+          timestamp: time,
+          createdAt: fullDateTime
+        };
+
+        const response = await api.post('/investor/send-message', messageData);
+        if (response?.data) {
+          // Create UI message with video call flag
+          const newMessage: ChatMessage = {
+            id: response.data._id || Date.now().toString(),
+            sender: currentUserId,
+            message: "Video Call",
+            timestamp: time,
+            createdAt: fullDateTime,
+            avatar: "/api/placeholder/40/40",
+            isVideoCall: true,
+            videoLink: videoLink
+          };
+
+          setMessages(prevMessages => {
+            const messageExists = prevMessages.some(msg => msg.id === newMessage.id);
+            if (messageExists) return prevMessages;
+            return [...prevMessages, newMessage];
+          });
+
+          setChats(prevChats =>
+            prevChats.map(chat =>
+              chat.id === activeChat
+                ? { ...chat, lastMessage: "Video Call", timestamp: time }
+                : chat
+            )
+          );
+
+          socket.emit("send_message", {
+            ...messageData,
+            id: response.data._id || Date.now().toString(),
+            chatId: activeChat,
+            receiverId: receiver?._id
+          });
+        }
+      } catch (error) {
+        console.error("Error sending video message:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
   const filteredChats = chats.filter(chat =>
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -384,7 +481,7 @@ const ChatPage = () => {
         logoUrl={logo}
         shortLogoUrl={shortlogo}
         links={[
-          { label: "Home", href: "/entrepreneur" },
+          { label: "Home", href: "/investor" },
           { label: "About Us", href: "/about-us" },
         ]}
       />
@@ -425,16 +522,24 @@ const ChatPage = () => {
                         alt={chat.name}
                         className="w-10 h-10 rounded-full"
                       />
-                      {chat.status === 'online' && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                      )}
+                      <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                        chat.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
+                      }`} />
                     </div>
                     <div className="ml-3 flex-1">
                       <div className="flex justify-between items-center">
                         <h3 className="font-semibold">{chat.name}</h3>
                         <span className="text-xs text-gray-500">{chat.timestamp}</span>
                       </div>
-                      <p className="text-sm text-gray-500 truncate">{chat.lastMessage}</p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {chat.lastMessage === "Video Call" ? (
+                          <span className="flex items-center">
+                            <Video className="h-3 w-3 mr-1" /> Video Call
+                          </span>
+                        ) : (
+                          chat.lastMessage
+                        )}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -452,9 +557,9 @@ const ChatPage = () => {
                           alt="Profile"
                           className="w-10 h-10 rounded-full"
                         />
-                        {chats.find(c => c.id === activeChat)?.status === 'online' && (
-                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                        )}
+                        <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                          chats.find(c => c.id === activeChat)?.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
+                        }`} />
                       </div>
                       <div className="ml-3">
                         <h3 className="font-semibold">
@@ -474,7 +579,7 @@ const ChatPage = () => {
                       onClick={handleVideoCall}
                     />
                   </div>
-
+  
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {messages.map((msg, index) => {
                       const isCurrentUser = msg.sender === currentUserId;
@@ -492,23 +597,23 @@ const ChatPage = () => {
                                 : 'bg-gray-200'
                             }`}
                           >
-                            <p>
-                              {msg.message.includes('video call') ? (
-                                <span>
-                                  {msg.message.split('Join using this link: ')[0]}
-                                  Join using this link: <a 
-                                    href={msg.message.split('Join using this link: ')[1]} 
-                                    className={isCurrentUser ? "text-blue-200 underline" : "text-blue-500 underline"}
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                  >
-                                    {msg.message.split('Join using this link: ')[1]}
-                                  </a>
-                                </span>
-                              ) : (
-                                msg.message
-                              )}
-                            </p>
+                            {msg.isVideoCall ? (
+                              <div className="flex items-center space-x-2">
+                                <Video className={`h-5 w-5 ${isCurrentUser ? 'text-white' : 'text-gray-700'}`} />
+                                <span>Video Call</span>
+                                <button
+                                  onClick={() => handleJoinVideoCall(msg.videoLink || '')}
+                                  className={`ml-2 px-2 py-1 rounded ${
+                                    isCurrentUser ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                                  } transition-colors text-sm flex items-center`}
+                                >
+                                  <span>Join</span>
+                                  <ExternalLink className="h-3 w-3 ml-1" />
+                                </button>
+                              </div>
+                            ) : (
+                              <p>{msg.message}</p>
+                            )}
                             <span
                               className={`text-xs ${
                                 isCurrentUser ? 'text-gray-300' : 'text-gray-500'
@@ -521,7 +626,7 @@ const ChatPage = () => {
                       );
                     })}
                   </div>
-
+  
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
                       <input
@@ -558,5 +663,5 @@ const ChatPage = () => {
     </div>
   );
 };
-
-export default ChatPage
+  
+export default ChatPage;

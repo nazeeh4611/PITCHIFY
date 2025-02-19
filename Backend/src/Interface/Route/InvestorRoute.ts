@@ -21,13 +21,15 @@ import {
   CreateChatUseCase,
   MessageUseCase,
   getReciever,
-  getAllchatusecase
+  getAllchatusecase,
+  
 } from "../../Usecase";
 import { OtpService } from "../../Infrastructure/service/Otpservice";
 import { InvestorRepository } from "../../Infrastructure/Repository/InvestorRepository";
 import {ChatRepositoryImpl} from "../../Infrastructure/Repository/ChatRepository"
 import {MessageRepositoryImpl} from "../../Infrastructure/Repository/MessageRepository"
 import { AdminRepository } from "../../Infrastructure/Repository/AdminRepository";
+import { entrepreneurRepository } from "../../Infrastructure/Repository";
 
 
 const router = Router();

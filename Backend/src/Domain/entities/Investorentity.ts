@@ -14,6 +14,7 @@ export interface IInvestordata {
   otp: number;
   tempreg: boolean;
   companydetails: string;
+  companyname:string;
   status:string;
   isApproved:boolean; 
   premium:{
@@ -37,6 +38,7 @@ export class Investor implements IInvestordata {
   otp: number;
   tempreg: boolean;
   companydetails: string;
+  companyname:string;
   status:string;
   isApproved:boolean; 
   premium:{
@@ -62,6 +64,7 @@ export class Investor implements IInvestordata {
     this.otp = data.otp!;
     this.tempreg = data.tempreg ?? true;
     this.companydetails = data.companydetails ?? "";
+    this.companyname = data.companyname ?? "";
     this.status = data.status ?? "not approved";
     this.isApproved = data.isApproved ?? false;
     this.premium = data.premium!;
@@ -82,6 +85,7 @@ export class Investor implements IInvestordata {
       otp: this.otp,
       tempreg: this.tempreg,
       companydetails: this.companydetails,
+      companyname:this.companyname,
       status:this.status,
       isApproved:this.isApproved,
       premium:this.premium

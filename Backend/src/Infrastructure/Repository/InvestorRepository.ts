@@ -55,11 +55,11 @@ export class InvestorRepository implements IInvestorRepository {
         }
     }
 
-    async verifyinvestor(email: string, companydetails: string,status:string): Promise<IInvestordata> {
+    async verifyinvestor(email: string, companydetails: string,status:string,companyName:string): Promise<IInvestordata> {
         try {
             const verifiedinvestor = await InvestorModel.findOneAndUpdate(
                 { email: email },
-                { companydetails: companydetails,status:status },
+                { companydetails: companydetails,status:status,comapanyname:companyName },
                 { new: true }
             );
 

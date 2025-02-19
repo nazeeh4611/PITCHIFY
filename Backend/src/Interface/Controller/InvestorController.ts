@@ -216,7 +216,7 @@ export class InvestorController{
 
             const companyDetails = file
     
-            const response = await this.verifyusecase.execute(email, companyDetails,status);
+            const response = await this.verifyusecase.execute(email, companyDetails,status,companyName);
             if (response) {
                 res.status(200).json({ success: true, message: "Investor verified successfully" });
             } else {

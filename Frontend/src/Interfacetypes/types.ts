@@ -9,6 +9,8 @@
 //     avatar:string,
 // }
 
+import { Types } from "mongoose";
+
 export interface DecodedToken {
     id: string;
     email: string;
@@ -41,6 +43,16 @@ export interface DecodedToken {
     firstname: string;
     lastname: string;
     email: string;
+    avatar:string;
+    phone:string;
+    companyname:string;
+    premium:Premium
+  }
+
+  export interface Premium {
+    plan:Types.ObjectId
+    endDate:Date,
+    startDate:Date
   }
   
   export interface ChatResponse {

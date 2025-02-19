@@ -14,7 +14,9 @@ import { EntrepreneurController } from "../Controller/EntrepreneurController";
   entrepreneurpremiumusecase,
   EntrepreneurGetChatUsecase,
   EntrepreneurGetMessageUsecase,
-  EntrepreneurMessageUseCase
+  EntrepreneurMessageUseCase,
+  GetInvestorUsecase,
+  EntrepreneurCreateChatUseCase
 } from "../../Usecase";
 import { OtpService } from '../../Infrastructure/service/Otpservice';
 import { S3Client } from "@aws-sdk/client-s3"; 
@@ -84,7 +86,10 @@ const EditmodelusecaseInstance = new Editmodelusecase(entrepreneurRepositoryInst
 const GetplanusecaseInstance = new Getplanusecase(adminrepositoryInstance)
 const entrepreneurpremiumusecaseInstance = new entrepreneurpremiumusecase(entrepreneurRepositoryInstance)
 const EntrepreneurGetChatUsecaseInstance = new EntrepreneurGetChatUsecase(ChatRepositoryInstance,entrepreneurRepositoryInstance)
+const EntrepreneurCreateChatUseCaseInstance = new EntrepreneurCreateChatUseCase(ChatRepositoryInstance,entrepreneurRepositoryInstance)
+
 const EntrepreneurGetMessageUsecaseInstance = new EntrepreneurGetMessageUsecase(MessageRepositoryInstance)
+const GetInvestorUsecaseInstance = new GetInvestorUsecase(adminrepositoryInstance)
 const EntrepreneurMessageUseCaseInstance = new EntrepreneurMessageUseCase(MessageRepositoryInstance,ChatRepositoryInstance,entrepreneurRepositoryInstance)
 const EntrepreneurControllerInstance = new EntrepreneurController(
      signupusecaseinstance,
@@ -101,7 +106,9 @@ const EntrepreneurControllerInstance = new EntrepreneurController(
      entrepreneurpremiumusecaseInstance,
      EntrepreneurGetChatUsecaseInstance,
      EntrepreneurGetMessageUsecaseInstance,
-     EntrepreneurMessageUseCaseInstance
+     EntrepreneurMessageUseCaseInstance,
+     GetInvestorUsecaseInstance,
+     EntrepreneurCreateChatUseCaseInstance
      );
 router.post("/register", (req, res, next) => {
     EntrepreneurControllerInstance.signup(req, res, next);
@@ -113,7 +120,6 @@ router.post("/verifyotp", (req, res, next) => {
 
 
 router.post("/login",(req,res,next)=>{
-  console.log("the dat is in login route in entre")
     EntrepreneurControllerInstance.login(req,res,next)
 });
 
@@ -122,8 +128,6 @@ router.post("/profile",(req,res,next)=>{
 })
 
 router.put("/editprofile", upload2.single("avatar"), (req, res,next) => {
-  console.log("File:", req.file);
-  console.log("Body:", req.body);
   EntrepreneurControllerInstance.editProfile(req,res,next);
 });
 
@@ -160,12 +164,24 @@ router.get("/get-chat/:email",(req,res,next)=>{
 })
 
 router.get("/get-messages/:chatId",(req,res,next)=>{
-  console.log("request is sending")
   EntrepreneurControllerInstance.getMessage(req,res,next)
 })
 
 router.post("/send-message",(req,res,next)=>{
   EntrepreneurControllerInstance.sendMessage(req,res,next)
+})
+
+
+router.post("/google-login",(req,res,next)=>{
+  EntrepreneurControllerInstance.googleLogin(req,res,next)
+})
+
+router.get("/get-investors",(req,res,next)=>{
+  EntrepreneurControllerInstance.getInvestors(req,res,next)
+})
+
+router.post("/create-chat",(req,res,next)=>{
+  EntrepreneurControllerInstance.createChat(req,res,next)
 })
 
 export { router as entrepreneurrouter };

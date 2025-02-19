@@ -88,7 +88,6 @@ const VideoCallPage = () => {
 
       <div className="flex-1 flex flex-col bg-gray-100 p-4">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Video Call</h1>
           <button
             onClick={handleBack}
             className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 rounded-lg px-4 py-2 transition-colors"

@@ -7,7 +7,7 @@ export interface IInvestorRepository {
     saveinvestor(user: Investor): Promise<IInvestordata>;
     findbyEmail(email: string): Promise<IInvestordata | null>;
     update(user: Partial<Investor>): Promise<IInvestordata>;
-    verifyinvestor(email: string, companydetails: string,status:string): Promise<IInvestordata>;
+    verifyinvestor(email: string, companydetails: string,status:string,companyName:string): Promise<IInvestordata>;
     modelsbycategory(category:string):Promise<IModelData[] | null>
     modelDetails(id:string):Promise<IModelData | null>
     addpremium(id:string,startdate:Date,enddate:Date,email:string):Promise<IInvestordata | null>

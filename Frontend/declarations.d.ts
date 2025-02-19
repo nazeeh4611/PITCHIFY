@@ -1,15 +1,14 @@
 declare module "*.jpeg" {
-    const value: string;
-    export default value;
-  }
-  
-  declare module "*.jpg" {
-    const  value: string;
-    export default value;
-  }
-  
-  declare module "*.png" {
-    const value: string;
-    export default value;
-  }
-  
+  const jpegValue: string;
+  export default jpegValue;
+}
+
+declare module "*.jpg" {
+  const jpgValue: string;
+  export default jpgValue;
+}
+
+declare module "*.png" {
+  const pngValue: string;
+  export default pngValue;
+}

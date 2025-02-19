@@ -15,7 +15,9 @@ import { signupUsecase,
     entrepreneurpremiumusecase,
     EntrepreneurGetChatUsecase,
     EntrepreneurGetMessageUsecase,
-    EntrepreneurMessageUseCase
+    EntrepreneurMessageUseCase,
+    GetInvestorUsecase,
+    EntrepreneurCreateChatUseCase
 } from '../../Usecase'
 import { Types } from 'mongoose';
 
@@ -36,7 +38,9 @@ export class EntrepreneurController {
         private premiumusecase:entrepreneurpremiumusecase,
         private getchatusecase:EntrepreneurGetChatUsecase,
         private getmessageusecase:EntrepreneurGetMessageUsecase,
-        private sendmessagusecase:EntrepreneurMessageUseCase
+        private sendmessagusecase:EntrepreneurMessageUseCase,
+        private getinvestorusecase:GetInvestorUsecase,
+        private createChatusecase:EntrepreneurCreateChatUseCase
     ) {}
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -118,10 +122,9 @@ export class EntrepreneurController {
         const refreshToken = response.refreshToken
 
         res.cookie('refreshToken', refreshToken, {
-            httpOnly: true, // Prevents client-side access to the cookie
-            secure: process.env.NODE_ENV === 'production', // Ensures cookies are sent over HTTPS in production
-            // sameSite: 'strict', // Helps prevent CSRF attacks
-            maxAge: 7 * 24 * 60 * 60 * 1000 // Cookie expiry time: 7 days
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', 
+            maxAge: 7 * 24 * 60 * 60 * 1000 
         });
 
         res.status(200).json({sucess:true,token})
@@ -131,6 +134,15 @@ export class EntrepreneurController {
         console.error(error,"error occured in login")
         res.status(500).json({success:false,message:"Internal server error"})
       }
+    }
+
+
+    async googleLogin(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            console.log(req.body)
+        } catch (error) {
+            
+        }
     }
 
 
@@ -362,6 +374,44 @@ export class EntrepreneurController {
             
         }
       }
+
+      async getInvestors(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            const response = await this.getinvestorusecase.execute()
+            res.status(200).json(response)
+        } catch (error) {
+            
+        }
+      }
+
+
+      async createChat(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { entrepreneurId, investorId } = req.body;
+           console.log(req.body,"the body data")
+    
+            const { chatId } = await this.createChatusecase.execute({
+                entrepreneurId,
+                investorId,
+            });
+    
+            console.log(chatId)
+            if (!chatId) {
+                res.status(500).json({ 
+                    message: "Failed to create or find chat" 
+                });
+                return;
+            }
+    
+            res.status(201).json({ chatId });
+        } catch (error) {
+            console.error("Chat Creation Controller Error:", error);
+            res.status(500).json({ 
+                message: "Error creating chat", 
+                error: error instanceof Error ? error.message : 'Unknown error' 
+            });
+        }
+    }
 
     
     

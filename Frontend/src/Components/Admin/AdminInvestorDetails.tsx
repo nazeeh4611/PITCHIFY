@@ -10,9 +10,9 @@ interface Investor {
   firstname: string;
   lastname: string;
   email: string;
-  companyName: string;
-  companydetails: string; // Assuming the image URL is part of the investor object
-  status: string; // Added status field to the Investor interface
+  companyname: string;
+  companydetails: string; 
+  status: string; 
 }
 
 const AdminInvestorDetails: React.FC = () => {
@@ -32,6 +32,7 @@ const AdminInvestorDetails: React.FC = () => {
   const getInvestorDetails = async () => {
     try {
       const response = await api.get(`/admin/investor-details?id=${id}`);
+      console.log(response.data.comapanyname)
       setInvestor(response.data);
     } catch (error) {
       console.error("Error fetching investor details:", error);
@@ -51,9 +52,9 @@ const AdminInvestorDetails: React.FC = () => {
           email,
         });
         console.log(response);
-        setInvestor({ ...investor, status: "approved" }); // Update investor status
-        setShowToast(true); // Show toast message
-        setTimeout(() => setShowToast(false), 3000); // Hide toast after 3 seconds
+        setInvestor({ ...investor, status: "approved" });
+        setShowToast(true); 
+        setTimeout(() => setShowToast(false), 3000);
       }
     } catch (error) {
       console.error("Error verifying investor:", error);
@@ -109,7 +110,7 @@ const AdminInvestorDetails: React.FC = () => {
                       Company Name:
                     </span>
                     <span className="text-gray-900">
-                      {investor.companyName}
+                      {investor.companyname}
                     </span>
                   </div>
                 </div>

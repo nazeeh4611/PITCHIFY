@@ -15,6 +15,8 @@ import Testimon1 from "../Layout/Image/Testimon1.jpg";
 import Testimon2 from "../Layout/Image/Testimon2.jpg";
 import Testimon3 from "../Layout/Image/Testimon3.jpg";
 import shortlogo from "../Layout/Image/shortlogo.png"
+import {Link} from "react-router-dom";
+
 
 import Footer from '../Layout/Footer';
 import logo from "../Layout/Image/logo.jpeg";
@@ -79,6 +81,8 @@ const EntrepreneurHome: React.FC = () => {
     ],
   };
 
+
+
   return (
     <>
      <Navbar
@@ -101,12 +105,14 @@ const EntrepreneurHome: React.FC = () => {
               Turn your innovative business ideas into reality by connecting with investors.
             </p>
             <div className="flex gap-4">
-              <button className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+              <button className="bg-indigo-900 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
                 Get Start
               </button>
-              <button className="border border-indigo-600 text-indigo-600 px-6 py-2 rounded-md hover:bg-indigo-50">
+              <Link to="/entrepreneur/investor-list">
+              <button  className="border border-indigo-900 text-indigo-900 px-6 py-2 rounded-md hover:bg-indigo-50">
                 Investor List
               </button>
+              </Link>
             </div>
           </div>
           <div className="hidden md:block">

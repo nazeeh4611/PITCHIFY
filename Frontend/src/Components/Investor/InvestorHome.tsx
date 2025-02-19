@@ -6,6 +6,9 @@ import logo from "../Layout/Image/logo.jpeg";
 import axios from "axios";
 import { baseurl } from "../../Constent/regex";
 import shortlogo from "../Layout/Image/shortlogo.png";
+import { Investor } from "../../Interfacetypes/types";
+import { useGetToken } from "../../token/Gettoken";
+import { Lock } from "lucide-react";
 
 interface TextLoopProps {
   words: string[];
@@ -52,7 +55,20 @@ const InvestorHome = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(8);
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<Partial<Investor>>({
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    premium: undefined
+  }); 
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+  const token = useGetToken("investor");
+  const email = token?.email;
+
+  const hasPremium = profile.premium?.endDate && new Date(profile.premium.endDate) > new Date();
+  
   const getcategory = async () => {
     try {
       const api = axios.create({
@@ -78,19 +94,44 @@ const InvestorHome = () => {
     }
   };
 
-  useEffect(() => {
-    getcategory();
-  }, []);
+  const accessData = async () => {
+    if (!email) return;
+  
+    try {
+      const response = await axios.post(
+        `${baseurl}/investor/profile`,
+        { email },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-  const handleToggleCategories = () => {
-    if (visibleCategoriesCount === 8) {
-      setVisibleCategoriesCount(category.length);
-    } else {
-      setVisibleCategoriesCount(8);
+      if (response.data.investor.Investor) {
+        setProfile(response.data.investor.Investor);
+      }
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
     }
   };
 
-  const handleCategoryClick = (categoryId: string) => {
+  useEffect(() => {
+    getcategory();
+    accessData();
+  }, [email]);
+
+  const handleToggleCategories = () => {
+    if (!hasPremium && visibleCategoriesCount === 8) {
+      setShowPremiumModal(true);
+      return;
+    }
+    setVisibleCategoriesCount(prev => prev === 8 ? category.length : 8);
+  };
+
+  const handleCategoryClick = (categoryId: string, index: number) => {
+    if (!hasPremium && index >= 2) {
+      setShowPremiumModal(true);
+      return;
+    }
     navigate(`/investor/models?category=${categoryId}`);
   };
 
@@ -101,6 +142,29 @@ const InvestorHome = () => {
 
   const filteredCategories = category.filter((cat) =>
     cat.categoryname.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const PremiumModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md">
+        <h3 className="text-xl font-bold mb-4">Premium Feature</h3>
+        <p className="mb-4">This feature is only available for premium members. Upgrade your plan to access all categories.</p>
+        <div className="flex justify-end gap-4">
+          <button 
+            onClick={() => setShowPremiumModal(false)}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            Close
+          </button>
+          <button 
+            onClick={() => navigate('/pricing')}
+            className="px-4 py-2 bg-indigo-900 text-white rounded hover:bg-indigo-800"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+    </div>
   );
 
   return (
@@ -166,11 +230,13 @@ const InvestorHome = () => {
                 Filter by Category
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {filteredCategories.slice(0, visibleCategoriesCount).map((category) => (
+                {filteredCategories.slice(0, visibleCategoriesCount).map((category, index) => (
                   <div
                     key={category._id}
-                    className="flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-lg cursor-pointer"
-                    onClick={() => handleCategoryClick(category._id)}
+                    className={`relative flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-lg cursor-pointer ${
+                      !hasPremium && index >= 2 ? 'opacity-75' : ''
+                    }`}
+                    onClick={() => handleCategoryClick(category._id, index)}
                   >
                     <img
                       src={category.image}
@@ -180,6 +246,11 @@ const InvestorHome = () => {
                     <p className="text-center text-gray-700 font-medium">
                       {category.categoryname}
                     </p>
+                    {!hasPremium && index >= 2 && (
+                      <div className="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center rounded-lg">
+                        <Lock className="w-8 h-8 text-gray-600" />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -203,6 +274,7 @@ const InvestorHome = () => {
         </div>
       </div>
 
+      {showPremiumModal && <PremiumModal />}
       <Footer />
     </div>
   );

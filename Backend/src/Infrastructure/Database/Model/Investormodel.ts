@@ -14,6 +14,7 @@ export interface IInvestordata extends Document {
     otp: number;
     tempreg: boolean;
     companydetails: string;
+    companyname:string;
     status:string;
     isApproved:boolean;
     premium:{
@@ -37,6 +38,7 @@ const InvestorSchema = new Schema<IInvestordata>(
         otp: { type: Number },
         tempreg: { type: Boolean, default: true },
         companydetails: { type: String, default: "" },
+        companyname:{type:String,default:""},
         status:{type:String,default:"not approved"},
         isApproved:{type:Boolean,default:false},
         premium:{

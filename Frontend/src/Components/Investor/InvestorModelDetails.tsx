@@ -90,32 +90,6 @@ const ModelDetailsInvestor: React.FC = () => {
     }
   };
   
-  // const handleRatingSubmit = async () => {
-  //   try {
-  //     const api = axios.create({
-  //       baseURL: baseurl,
-  //     });
-
-  //     await api.post('/investor/submit-rating', {
-  //       modelId: id,
-  //       rating,
-  //       review,
-  //       email
-  //     });
-
-  //     // Reset form and close modal
-  //     setRating(0);
-  //     setReview('');
-  //     setShowModal(false);
-
-  //     // Show success toast
-  //     toast.success("Rating submitted successfully!");
-  //   } catch (error) {
-  //     console.error("Error submitting rating:", error);
-  //     toast.error("Failed to submit rating. Please try again.");
-  //   }
-  // };
-
 
 
   const handleConnectNow = async () => {

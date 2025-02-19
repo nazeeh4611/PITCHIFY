@@ -12,6 +12,7 @@ export * from "./EntrepreneurPremiumUsecase"
 export * from "./EntrepreneurGetChatUsecase"
 export *  from "./EntrepreneurGetMessageUsecase"
 export * from "./EntrepreneurSendmessageUsecase"
+export * from "./EntrepreneurCreateChat"
 // Investor usecases
 
 export * from "./InvestorVerifyotp"

@@ -1,4 +1,10 @@
 import React from 'react';
+import shortlogo from "../Layout/Image/shortlogo.png";
+import Sidebar from './EntrepreneurSidebar';
+import axios from 'axios';
+import { baseurl } from '../../Constent/regex';
+import Navbar from '../Layout/Navbar';
+import logo from "../Layout/Image/logo.jpeg";
 
 interface SubscriptionDetailsProps {
   entrepreneurdata: any;
@@ -21,6 +27,13 @@ const EntrepreneurSubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({ e
   };
 
   return (
+    <>
+    <Navbar logoUrl={logo}
+        shortLogoUrl={shortlogo}
+        links={[
+          { label: "Home", href: "/entrepreneur" },
+          { label: "About Us", href: "/about-us" },
+        ]}/>
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-3">Plan Details</h2>
@@ -55,6 +68,7 @@ const EntrepreneurSubscriptionDetails: React.FC<SubscriptionDetailsProps> = ({ e
         Cancel Subscription
       </button>
     </div>
+    </>
   );
 };
 
