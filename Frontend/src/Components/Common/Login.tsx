@@ -22,7 +22,6 @@ const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Form logic
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -53,7 +52,6 @@ const Login: React.FC = () => {
     },
   });
 
-  // Handle Google Authentication
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       const { credential } = credentialResponse;

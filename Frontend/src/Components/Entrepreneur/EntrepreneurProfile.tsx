@@ -8,23 +8,32 @@ import logo from "../Layout/Image/logo.jpeg";
 import Navbar from "../Layout/Navbar";
 import shortlogo from "../Layout/Image/shortlogo.png";
 import { FaEdit, FaPlus } from "react-icons/fa";
+import { baseurl } from "../../Constent/regex";
+import { Menu, X } from 'lucide-react';
 
 const ProfileSkeleton = () => (
   <div className="animate-pulse space-y-6">
-    {/* Profile Image and Name Section */}
     <div className="flex flex-col items-center space-y-4">
-      <div className="w-32 h-32 bg-gray-200 rounded-full"></div>
-      <div className="flex justify-center items-center gap-8">
-        <div className="h-8 bg-gray-200 w-40 rounded"></div>
-        <div className="h-8 bg-gray-200 w-40 rounded"></div>
+      <div className="relative">
+        <div className="w-32 h-32 bg-gray-200 rounded-full"></div>
       </div>
-      <div className="h-4 bg-gray-200 w-24 rounded"></div>
+
+      <div className="text-center w-full">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-8">
+          <div className="min-h-[2.5rem] flex items-center">
+            <div className="h-6 bg-gray-200 w-40 rounded"></div>
+          </div>
+          <div className="min-h-[2.5rem] flex items-center">
+            <div className="h-6 bg-gray-200 w-40 rounded"></div>
+          </div>
+        </div>
+        <div className="h-4 bg-gray-200 w-24 mx-auto mt-2 rounded"></div>
+      </div>
     </div>
 
-    {/* Contact Information Section */}
     <div className="space-y-4">
       <div className="border-t pt-4">
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <div className="h-4 bg-gray-200 w-20 rounded mb-2"></div>
             <div className="h-6 bg-gray-200 w-48 rounded"></div>
@@ -37,8 +46,7 @@ const ProfileSkeleton = () => (
       </div>
     </div>
 
-    {/* Subscription Section */}
-    <div className="border-t pt-4 space-y-4">
+    <div className="border-t pt-4">
       <div>
         <div className="h-4 bg-gray-200 w-32 rounded mb-2"></div>
         <div className="h-6 bg-gray-200 w-24 rounded"></div>
@@ -49,12 +57,29 @@ const ProfileSkeleton = () => (
       </div>
     </div>
 
-    {/* Button Section */}
-    <div className="border-t pt-4 mt-6">
+    <div className="flex justify-between mt-6">
       <div className="h-10 bg-gray-200 w-32 rounded"></div>
     </div>
   </div>
 );
+
+interface ProfileData {
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  role: string;
+  profile?: string;
+  premium?: {
+    startDate: string;
+    endDate: string;
+    plan: {
+      planName: string;
+      isActive: boolean;
+    };
+  };
+}
 
 const EntrepreneurProfile = (): JSX.Element => {
   const location = useLocation();
@@ -64,7 +89,7 @@ const EntrepreneurProfile = (): JSX.Element => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileData>({
     firstname: "",
     lastname: "",
     email: "",
@@ -74,7 +99,7 @@ const EntrepreneurProfile = (): JSX.Element => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [updatedProfile, setUpdatedProfile] = useState({
+  const [updatedProfile, setUpdatedProfile] = useState<ProfileData>({
     firstname: "",
     lastname: "",
     email: "",
@@ -85,6 +110,7 @@ const EntrepreneurProfile = (): JSX.Element => {
 
   const [updatedImageFile, setUpdatedImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(profileImage);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const accessData = async () => {
     if (!email) {
@@ -93,7 +119,7 @@ const EntrepreneurProfile = (): JSX.Element => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3009/api/${userType}/profile`,
+        `${baseurl}/${userType}/profile`,
         { email },
         {
           headers: {
@@ -121,11 +147,26 @@ const EntrepreneurProfile = (): JSX.Element => {
     }
   };
 
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
   useEffect(() => {
     accessData();
-    document.body.style.overflow = "hidden";
+    
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setShowSidebar(true);
+      } else {
+        setShowSidebar(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
     return () => {
-      document.body.style.overflow = "auto";
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -160,7 +201,7 @@ const EntrepreneurProfile = (): JSX.Element => {
 
     try {
       const response = await axios.put(
-        `http://localhost:3009/api/${userType}/editprofile`,
+        `${baseurl}/${userType}/editprofile`,
         formData,
         {
           headers: {
@@ -230,42 +271,40 @@ const EntrepreneurProfile = (): JSX.Element => {
           </div>
 
           <div className="text-center w-full">
-            <div className="flex justify-center items-center">
-              <div className="min-h-[2.5rem] flex items-center w-40">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-8">
+              <div className="min-h-[2.5rem] flex items-center">
                 {isEditing ? (
                   <input
                     type="text"
                     name="firstname"
                     value={updatedProfile.firstname}
                     onChange={handleInputChange}
-                    className="font-semibold bg-blue-50 focus:outline-none px-2 w-40"
+                    className="font-semibold bg-blue-50 focus:outline-none px-2 w-full sm:w-40 text-center sm:text-left"
                     placeholder="First name"
                     disabled={isUpdating}
                   />
                 ) : (
-                  <h1 className="text-xl font-semibold w-40">{profile.firstname}</h1>
+                  <h1 className="text-xl font-semibold w-full sm:w-40 text-center sm:text-left">{profile.firstname}</h1>
                 )}
               </div>
               
-              <div className="w-8"></div>
-              
-              <div className="min-h-[2.5rem] flex items-center w-40">
+              <div className="min-h-[2.5rem] flex items-center">
                 {isEditing ? (
                   <input
                     type="text"
                     name="lastname"
                     value={updatedProfile.lastname}
                     onChange={handleInputChange}
-                    className="font-semibold bg-blue-50 focus:outline-none px-2 w-40"
+                    className="font-semibold bg-blue-50 focus:outline-none px-2 w-full sm:w-40 text-center sm:text-left"
                     placeholder="Last name"
                     disabled={isUpdating}
                   />
                 ) : (
-                  <h1 className="text-xl font-semibold w-40">{profile.lastname}</h1>
+                  <h1 className="text-xl font-semibold w-full sm:w-40 text-center sm:text-left">{profile.lastname}</h1>
                 )}
               </div>
             </div>
-            <p className="text-[#00186E] font-medium mt-2">Entrepreneur</p>
+            <p className="text-[#1e1b4b] font-medium mt-2">Entrepreneur</p>
           </div>
         </div>
 
@@ -289,7 +328,7 @@ const EntrepreneurProfile = (): JSX.Element => {
                     disabled={isUpdating}
                   />
                 ) : (
-                  <p className="font-medium">{profile.phone}</p>
+                  <p className="font-medium">{profile.phone || "Not provided"}</p>
                 )}
               </div>
             </div>
@@ -299,20 +338,26 @@ const EntrepreneurProfile = (): JSX.Element => {
         <div className="border-t pt-4">
           <div>
             <label className="text-sm text-gray-500">Subscription Plan</label>
-            <p className="font-medium">Premium</p>
+            <p className="font-medium">
+              {profile.premium?.plan?.isActive ? profile.premium?.plan?.planName : "Free Plan"}
+            </p>
           </div>
-          <div>
-            <label className="text-sm text-gray-500">Subscription Expiry</label>
-            <p className="font-medium">2025-12-31</p>
-          </div>
+          {profile.premium?.plan?.isActive && (
+            <div>
+              <label className="text-sm text-gray-500">Subscription Expiry</label>
+              <p className="font-medium">
+                {profile.premium?.endDate ? new Date(profile.premium.endDate).toLocaleDateString() : "N/A"}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between mt-6">
           {isEditing ? (
-            <div className="flex gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
               <button
                 onClick={handleSaveChanges}
-                className="px-4 py-2 bg-green-600 text-white rounded-md flex items-center gap-2"
+                className="px-4 py-2 bg-green-600 text-white rounded-md flex items-center justify-center gap-2"
                 disabled={isUpdating}
               >
                 {isUpdating ? (
@@ -335,9 +380,9 @@ const EntrepreneurProfile = (): JSX.Element => {
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="mt-4 px-4 py-2 bg-[#00186E] text-white rounded-md"
+              className="mt-4 px-4 py-2 bg-[#1e1b4b] text-white rounded-md flex items-center gap-2"
             >
-              Edit Profile
+              <FaEdit /> Edit Profile
             </button>
           )}
         </div>
@@ -355,21 +400,31 @@ const EntrepreneurProfile = (): JSX.Element => {
           { label: "About Us", href: "/about-us" },
         ]}
       />
-      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 relative">
+
+      <div className="flex-1 flex justify-center items-center bg-gray-100 p-2 sm:p-4 min-h-screen">
         <div
-          className="bg-white rounded-[2%] shadow-lg p-2 sm:p-4 md:p-6 flex flex-col md:flex-row w-full max-w-sm sm:max-w-md md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
+          className="bg-white rounded-[2%] shadow-lg p-1 sm:p-2 md:p-4 flex flex-col md:flex-row w-full max-w-full sm:max-w-full md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
           style={{
-            minHeight: "20vh",
-            height: "auto",
-            padding: "0.5rem",
+            minHeight: "80vh",
           }}
         >
-          <div className="md:w-1/4 w-full">
+          <div className="md:hidden absolute top-2 left-2 z-20">
+            <button 
+              onClick={toggleSidebar}
+              className="p-2 text-[#1e1b4b] rounded-lg hover:bg-gray-100"
+            >
+              {showSidebar ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+
+          <div 
+            className={`${showSidebar ? 'block' : 'hidden'} md:block absolute md:relative z-10 bg-white w-3/4 md:w-1/4 min-h-10 border-r border-gray-200`}
+          >
             <Sidebar onSectionChange={(id) => console.log(id)} />
           </div>
 
-          <div className="md:w-3/4 w-full md:pl-8 mt-4 md:mt-0">
-            <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          <div className="w-full md:w-3/4 flex flex-col md:pl-6 mt-12 md:mt-0">
+            <div className="bg-white border border-gray-300 rounded-lg shadow-md p-4 sm:p-6 w-full h-full">
               {renderProfileContent()}
             </div>
           </div>

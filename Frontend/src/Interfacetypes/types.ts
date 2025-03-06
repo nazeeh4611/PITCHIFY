@@ -37,6 +37,7 @@ export interface DecodedToken {
     status: string;
     receiverId: string;
   }
+
   
   export interface Investor {
     _id: string;
@@ -77,3 +78,15 @@ export interface DecodedToken {
   }
 
 
+
+  export interface ChatMessage {
+    id: string;
+    sender: string;
+    message: string;
+    timestamp: string;
+    createdAt: string;
+    avatar: string;
+    isVideoCall?: boolean;
+    videoLink?: string;
+  }
+  

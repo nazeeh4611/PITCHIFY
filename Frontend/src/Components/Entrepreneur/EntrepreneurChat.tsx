@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Video, Search, ExternalLink } from 'lucide-react';
+import { Send, Video, Search, ExternalLink, Menu, X } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 import { baseurl } from '../../Constent/regex';
@@ -10,44 +10,11 @@ import Navbar from '../Layout/Navbar';
 import Sidebar from './EntrepreneurSidebar';
 import shortlogo from "../Layout/Image/shortlogo.png";
 import logo from "../Layout/Image/logo.jpeg";
-
-interface MessageResponse {
-  _id: string;
-  sender: string;
-  content: string;
-  createdAt: string;
-}
+import { ChatMessage,Chat,Investor,MessageResponse } from '../../Interfacetypes/types';
 
 interface ChatResponse {
   investor: Investor[];
   latestmessage?: { message: string; createdAt: string }[];
-}
-
-interface Investor {
-  _id: string;
-  firstname: string;
-  lastname: string;
-}
-
-interface Chat {
-  id: string;
-  name: string;
-  lastMessage: string;
-  timestamp: string;
-  avatar: string;
-  status: string;
-  receiverId: string;
-}
-
-interface ChatMessage {
-  id: string;
-  sender: string;
-  message: string;
-  timestamp: string;
-  createdAt: string;
-  avatar: string;
-  isVideoCall?: boolean;
-  videoLink?: string;
 }
 
 const EntrepreneurChat = () => {
@@ -61,6 +28,8 @@ const EntrepreneurChat = () => {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showChatList, setShowChatList] = useState(true);
 
   const { id } = useParams();
   const token = useGetToken("entrepreneur");
@@ -91,17 +60,14 @@ const EntrepreneurChat = () => {
     const roomLink = `/investor/video-call/${roomId}`;
     const loc = `/entrepreneur/video-call/${roomId}`;
     
-    // Send video call message with improved formatting
     handleSendVideoMessage(roomLink);
     
-    // Navigate to the video call page
     navigate(loc);
   };
 
   const handleJoinVideoCall = (videoLink: string) => {
     if (!videoLink) return;
     
-    // Extract the room ID from the video link
     const linkMatch = videoLink.match(/\/video-call\/([^"'\s]+)/);
     if (linkMatch && linkMatch[1]) {
       navigate(`/entrepreneur/video-call/${linkMatch[1]}`);
@@ -117,7 +83,6 @@ const EntrepreneurChat = () => {
     setIsProcessing(true);
     const { time, fullDateTime } = formatDateTime();
     
-    // The actual message with hidden link that gets stored in the database
     const meetingMessage = `I've started a video call. Join using this link: ${window.location.origin}${link}`;
     
     const messageData = {
@@ -133,7 +98,6 @@ const EntrepreneurChat = () => {
     try {
       const response = await api.post('/entrepreneur/send-message', messageData);
       if (response?.data) {
-        // Create a formatted message with video call flag for the UI
         const newMessage: ChatMessage = {
           id: response.data._id,
           sender: currentUserId,
@@ -230,7 +194,6 @@ const EntrepreneurChat = () => {
       
       if (Array.isArray(messageHistory)) {
         const formattedMessages: ChatMessage[] = messageHistory.map((msg: MessageResponse) => {
-          // Check if this is a video call message
           const isVideoCall = msg.content.includes('video call');
           let videoLink = '';
           
@@ -368,6 +331,9 @@ const EntrepreneurChat = () => {
   useEffect(() => {
     if (activeChat) {
       fetchMessages(activeChat);
+      if (window.innerWidth < 768) {
+        setShowChatList(false);
+      }
     }
   }, [activeChat]);
 
@@ -375,8 +341,26 @@ const EntrepreneurChat = () => {
     const newSocket = io("http://localhost:3009");
     setSocket(newSocket);
 
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setShowChatList(true);
+        setShowSidebar(true);
+      } else {
+        setShowSidebar(false);
+        if (activeChat) {
+          setShowChatList(false);
+        } else {
+          setShowChatList(true);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
     return () => {
       newSocket.disconnect();
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -384,12 +368,10 @@ const EntrepreneurChat = () => {
     if (socket) {
       socket.on("receive_message", (data: any) => {
         if (data.sender !== currentUserId) {
-          // Check if this is a video call message
           if (data.message && data.message.includes('video call')) {
             const linkMatch = data.message.match(/Join using this link: (.+)/);
             const videoLink = linkMatch ? linkMatch[1] : '';
             
-            // Create formatted message with video call flag
             const videoCallMessage: ChatMessage = {
               id: data.id || Date.now().toString(),
               sender: data.sender,
@@ -403,12 +385,10 @@ const EntrepreneurChat = () => {
             
             setMessages(prev => [...prev, videoCallMessage]);
             
-            // Popup for incoming video call
             if (window.confirm('You received a video call invitation. Would you like to join?')) {
               handleJoinVideoCall(videoLink);
             }
           } else {
-            // Regular message handling
             setMessages(prev => [...prev, data]);
           }
           
@@ -440,9 +420,292 @@ const EntrepreneurChat = () => {
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
+  const handleBackToChats = () => {
+    setShowChatList(true);
+  };
+
+  const handleChatSelect = (chatId: string) => {
+    setActiveChat(chatId);
+    if (window.innerWidth < 768) {
+      setShowChatList(false);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
+  const renderLoadingState = () => (
+    <div className="flex-1 flex justify-center items-center bg-gray-100 p-4">
+        <div
+          className="bg-white rounded-[2%] shadow-lg p-1 sm:p-2 md:p-4 flex flex-col md:flex-row w-full max-w-full sm:max-w-full md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
+          style={{
+            height: "80vh",
+          }}
+        >
+        <div className="hidden md:block md:w-1/4 border-r border-gray-200">
+          <Sidebar onSectionChange={(id) => console.log(id)} />
+        </div>
+
+        <div className="w-full md:w-3/4 flex flex-col md:flex-row">
+          <div className="w-full md:w-1/3 border-r border-gray-200 flex flex-col">
+            <div className="bg-[#1e1b4b] p-4">
+              <h1 className="text-2xl font-bold mb-4 text-white">Chats</h1>
+              <div className="relative">
+                <div className="w-full p-2 pl-8 rounded-lg border border-gray-300 bg-gray-200 animate-pulse h-10"></div>
+                <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center p-4 border-b border-gray-100">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+                  <div className="ml-3 flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="h-4 bg-gray-200 animate-pulse rounded w-24"></div>
+                      <div className="h-3 bg-gray-200 animate-pulse rounded w-10"></div>
+                    </div>
+                    <div className="h-3 bg-gray-200 animate-pulse rounded w-32"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden md:flex md:w-2/3 flex-col">
+            <div className="bg-[#1e1b4b] p-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse"></div>
+                <div className="ml-3">
+                  <div className="h-4 bg-gray-300 animate-pulse rounded w-24 mb-1"></div>
+                  <div className="h-3 bg-gray-300 animate-pulse rounded w-16"></div>
+                </div>
+              </div>
+              <div className="w-6 h-6 bg-gray-300 animate-pulse rounded"></div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[70%] rounded-lg p-3 ${
+                      i % 2 === 0
+                        ? 'bg-gray-200 animate-pulse'
+                        : 'bg-gray-300 animate-pulse'
+                    }`}
+                    style={{ height: '50px', width: `${Math.floor(Math.random() * 30) + 40}%` }}
+                  ></div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+                <div className="w-10 h-10 bg-gray-300 animate-pulse rounded-lg"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderMainContent = () => (
+    <div className="flex-1 flex justify-center items-center bg-gray-100 p-2 sm:p-4">
+      <div
+        className="bg-white rounded-[2%] shadow-lg p-1 sm:p-2 md:p-4 flex flex-col md:flex-row w-full max-w-full sm:max-w-full md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
+        style={{ height: "80vh" }}
+      >
+        <div className="md:hidden absolute top-2 left-2 z-20">
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 text-[#1e1b4b] rounded-lg hover:bg-gray-100"
+          >
+            {showSidebar ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        <div 
+          className={`${showSidebar ? 'block' : 'hidden'} md:block absolute md:relative z-10 bg-white w-3/4 md:w-1/4 h-full border-r border-gray-200`}
+        > 
+          <Sidebar onSectionChange={(id) => console.log(id)} />
+        </div>
+        <div className="w-full md:w-3/4 flex flex-col md:flex-row h-full">
+          <div className={`${showChatList ? 'block' : 'hidden'} md:block w-full md:w-1/3 border-r border-gray-200 flex flex-col md:mt-0 mt-12 h-full`}>
+            <div className="bg-[#1e1b4b] text-white p-4">
+              <h1 className="text-2xl font-bold mb-4">Chats</h1>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-[#1e1b4b] text-gray-800"
+                />
+                <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {filteredChats.map((chat) => (
+                <div
+                  key={chat.id}
+                  className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 ${
+                    activeChat === chat.id ? 'bg-gray-100' : ''
+                  }`}
+                  onClick={() => handleChatSelect(chat.id)}
+                >
+                  <img
+                    src={chat.avatar}
+                    alt={chat.name}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div className="ml-3 flex-1">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold">{chat.name}</h3>
+                      <span className="text-xs text-gray-500">{chat.timestamp}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 truncate">
+                      {chat.lastMessage === "Video Call" || chat.lastMessage.includes("video call") ? (
+                        <span className="flex items-center">
+                          <Video className="h-3 w-3 mr-1" /> Video Call
+                        </span>
+                      ) : (
+                        chat.lastMessage
+                      )}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className={`${!showChatList ? 'block' : 'hidden'} md:block w-full md:w-2/3 flex flex-col h-full`}>
+            {activeChat ? (
+              <>
+                <div className="bg-[#1e1b4b] text-white p-4 flex items-center justify-between">
+                  {!showChatList && (
+                    <button 
+                      onClick={handleBackToChats}
+                      className="md:hidden mr-2 text-white"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                  )}
+                  <div className="flex items-center">
+                    <img
+                      src={chats.find(c => c.id === activeChat)?.avatar}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div className="ml-3">
+                      <h3 className="font-semibold">
+                        {chats.find(c => c.id === activeChat)?.name}
+                      </h3>
+                      <span className="text-sm text-green-400">online</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <Video 
+                      className="h-6 w-6 text-white cursor-pointer hover:text-gray-300 transition-colors" 
+                      onClick={handleVideoCall}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "calc(100% - 140px)" }}>
+                  {messages.map((msg) => {
+                    const isCurrentUser = msg.sender === currentUserId;
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex ${
+                          isCurrentUser ? 'justify-end' : 'justify-start'
+                        }`}
+                      >
+                        <div
+                          className={`max-w-[70%] sm:max-w-[70%] md:max-w-[70%] rounded-lg p-3 ${
+                            isCurrentUser
+                              ? 'bg-[#1e1b4b] text-white'
+                              : 'bg-gray-200'
+                          }`}
+                        >
+                          {msg.isVideoCall ? (
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                              <div className="flex items-center">
+                                <Video className={`h-5 w-5 ${isCurrentUser ? 'text-white' : 'text-gray-700'}`} />
+                                <span className="ml-1">Video Call</span>
+                              </div>
+                              <button
+                                onClick={() => handleJoinVideoCall(msg.videoLink || '')}
+                                className={`px-2 py-1 rounded ${
+                                  isCurrentUser ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                                } transition-colors text-sm flex items-center`}
+                              >
+                                <span>Join</span>
+                                <ExternalLink className="h-3 w-3 ml-1" />
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="break-words text-sm sm:text-base">{msg.message}</p>
+                          )}
+                          <span
+                            className={`text-xs ${
+                              isCurrentUser ? 'text-gray-300' : 'text-gray-500'
+                            } block text-right mt-1`}
+                          >
+                            {msg.timestamp}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-2 sm:p-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Type message..."
+                      className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#1e1b4b]"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={isProcessing}
+                      className="p-2 bg-[#1e1b4b] text-white rounded-lg hover:bg-[#29256d] focus:outline-none transition-colors"
+                    >
+                      <Send className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-4">
+                <img 
+                  src={shortlogo} 
+                  alt="Logo" 
+                  className="w-16 h-16 mb-4 opacity-50"
+                />
+                <p className="text-center">Select a chat to start messaging</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-screen">
@@ -454,167 +717,7 @@ const EntrepreneurChat = () => {
           { label: "About Us", href: "/about-us" },
         ]}
       />
-
-      <div className="flex-1 flex justify-center items-center bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow-lg flex w-full max-w-[1300px] h-[calc(100vh-120px)]">
-          <div className="w-1/4 border-r border-gray-200">
-            <Sidebar onSectionChange={(id) => console.log(id)} />
-          </div>
-
-          <div className="w-3/4 flex">
-            <div className="w-1/3 border-r border-gray-200 flex flex-col">
-              <div className="bg-[#1e1b4b] text-white p-4">
-                <h1 className="text-2xl font-bold mb-4">Chats</h1>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-[#1e1b4b] text-gray-800"
-                  />
-                  <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                {filteredChats.map((chat) => (
-                  <div
-                    key={chat.id}
-                    className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 ${
-                      activeChat === chat.id ? 'bg-gray-100' : ''
-                    }`}
-                    onClick={() => setActiveChat(chat.id)}
-                  >
-                    <img
-                      src={chat.avatar}
-                      alt={chat.name}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div className="ml-3 flex-1">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">{chat.name}</h3>
-                        <span className="text-xs text-gray-500">{chat.timestamp}</span>
-                      </div>
-                      <p className="text-sm text-gray-500 truncate">
-                        {chat.lastMessage === "Video Call" || chat.lastMessage.includes("video call") ? (
-                          <span className="flex items-center">
-                            <Video className="h-3 w-3 mr-1" /> Video Call
-                          </span>
-                        ) : (
-                          chat.lastMessage
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="w-2/3 flex flex-col">
-              {activeChat ? (
-                <>
-                  <div className="bg-[#1e1b4b] text-white p-4 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <img
-                        src={chats.find(c => c.id === activeChat)?.avatar}
-                        alt="Profile"
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div className="ml-3">
-                        <h3 className="font-semibold">
-                          {chats.find(c => c.id === activeChat)?.name}
-                        </h3>
-                        <span className="text-sm text-green-400">online</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <Video 
-                        className="h-6 w-6 text-white cursor-pointer hover:text-gray-300 transition-colors" 
-                        onClick={handleVideoCall}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {messages.map((msg) => {
-                      const isCurrentUser = msg.sender === currentUserId;
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex ${
-                            isCurrentUser ? 'justify-end' : 'justify-start'
-                          }`}
-                        >
-                          <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
-                              isCurrentUser
-                                ? 'bg-[#1e1b4b] text-white'
-                                : 'bg-gray-200'
-                            }`}
-                          >
-                            {msg.isVideoCall ? (
-                              <div className="flex items-center space-x-2">
-                                <Video className={`h-5 w-5 ${isCurrentUser ? 'text-white' : 'text-gray-700'}`} />
-                                <span>Video Call</span>
-                                <button
-                                  onClick={() => handleJoinVideoCall(msg.videoLink || '')}
-                                  className={`ml-2 px-2 py-1 rounded ${
-                                    isCurrentUser ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-500 hover:bg-indigo-600 text-white'
-                                  } transition-colors text-sm flex items-center`}
-                                >
-                                  <span>Join</span>
-                                  <ExternalLink className="h-3 w-3 ml-1" />
-                                </button>
-                              </div>
-                            ) : (
-                              <p className="break-words">{msg.message}</p>
-                            )}
-                            <span
-                              className={`text-xs ${
-                                isCurrentUser ? 'text-gray-300' : 'text-gray-500'
-                              } block text-right mt-1`}
-                            >
-                              {msg.timestamp}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="p-4 border-t border-gray-200">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Type message..."
-                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#1e1b4b]"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleSendMessage();
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={handleSendMessage}
-                        disabled={isProcessing}
-                        className="p-2 bg-[#1e1b4b] text-white rounded-lg hover:bg-[#29256d] focus:outline-none transition-colors"
-                      >
-                        <Send className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-gray-500">
-                  Select a chat to start messaging
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {loading ? renderLoadingState() : renderMainContent()}
     </div>
   );
 };

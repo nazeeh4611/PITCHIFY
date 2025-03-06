@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Video, Search, ExternalLink } from 'lucide-react';
+import { Send, Video, Search, ExternalLink, Menu, X } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import Navbar from '../Layout/Navbar';
@@ -65,6 +65,8 @@ const ChatPage = () => {
   const [userName, setUserName] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chats, setChats] = useState<Chat[]>([]);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showChatList, setShowChatList] = useState(true);
 
   const api = axios.create({
     baseURL: baseurl,
@@ -81,7 +83,6 @@ const ChatPage = () => {
     const videoCallLink = `${window.location.origin}/entrepreneur/video-call/${activeChat}`;
     const videoMessage = `I've started a video call.`;
     
-    // Create special message with video call flag and link
     handleSendVideoMessage(videoMessage, videoCallLink);
     
     navigate(`/investor/video-call/${activeChat}`, {
@@ -124,7 +125,6 @@ const ChatPage = () => {
       const messageHistory = response.data?.messages || response.data || [];
       if (Array.isArray(messageHistory)) {
         const formattedMessages: ChatMessage[] = messageHistory.map((msg: MessageResponse) => {
-          // Check if this is a video call message
           const isVideoCall = msg.content.includes('video call');
           let videoLink = '';
           
@@ -223,8 +223,38 @@ const ChatPage = () => {
         };
         setReceiver(chatReceiver);
       }
+      
+      if (window.innerWidth < 768) {
+        setShowChatList(false);
+      }
     }
   }, [activeChat, chats]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setShowSidebar(true);
+        setShowChatList(true);
+      } else if (window.innerWidth >= 768) {
+        setShowSidebar(false);
+        setShowChatList(true);
+      } else {
+        setShowSidebar(false);
+        if (activeChat) {
+          setShowChatList(false);
+        } else {
+          setShowChatList(true);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [activeChat]);
 
   useEffect(() => {
     const newSocket = io("http://localhost:3009");
@@ -283,8 +313,8 @@ const ChatPage = () => {
           status: onlineStatus[chat.userId] ? 'online' : 'offline'
         }))
       );
-      
     });
+    
     return () => {
       if (currentUserId) {
         newSocket.emit('user_disconnected', { userId: currentUserId });
@@ -298,12 +328,10 @@ const ChatPage = () => {
       socket.removeAllListeners("receive_message");
       socket.on("receive_message", (data: any) => {
         if (data.sender !== email) {
-          // Check if message is a video call
           if (data.message && data.message.includes('video call')) {
             const linkMatch = data.message.match(/Join using this link: (.+)/);
             const videoLink = linkMatch ? linkMatch[1] : '';
             
-            // Create formatted message with video call flag
             const formattedMessage: ChatMessage = {
               id: data.id,
               sender: data.sender,
@@ -321,12 +349,10 @@ const ChatPage = () => {
               return [...prevMessages, formattedMessage];
             });
             
-            // Popup for incoming video call
             if (window.confirm('You received a video call invitation. Would you like to join?')) {
               handleJoinVideoCall(videoLink);
             }
           } else {
-            // Regular message handling
             setMessages(prevMessages => {
               const messageExists = prevMessages.some(msg => msg.id === data.id);
               if (messageExists) return prevMessages;
@@ -334,7 +360,6 @@ const ChatPage = () => {
             });
           }
           
-          // Update chat list
           setChats(prevChats => 
             prevChats.map(chat => 
               chat.id === activeChat 
@@ -416,7 +441,6 @@ const ChatPage = () => {
       try {
         setIsProcessing(true);
         const { time, fullDateTime } = formatDateTime();
-        // Send actual message with hidden link to backend
         const actualMessage = `${customMessage} Join using this link: ${videoLink}`;
         const messageData = {
           sender: currentUserId,
@@ -430,7 +454,6 @@ const ChatPage = () => {
 
         const response = await api.post('/investor/send-message', messageData);
         if (response?.data) {
-          // Create UI message with video call flag
           const newMessage: ChatMessage = {
             id: response.data._id || Date.now().toString(),
             sender: currentUserId,
@@ -475,8 +498,16 @@ const ChatPage = () => {
     chat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const toggleChatList = () => {
+    setShowChatList(!showChatList);
+  };
+
+  const toggleSidebar = () => {
+    setShowSidebar(!showSidebar);
+  };
+
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <Navbar
         logoUrl={logo}
         shortLogoUrl={shortlogo}
@@ -486,71 +517,101 @@ const ChatPage = () => {
         ]}
       />
 
-      <div className="flex-1 flex justify-center items-center bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow-lg flex w-full max-w-[1300px] h-[calc(100vh-120px)]">
-          <div className="w-1/4 border-r border-gray-200">
-            <Sidebar onSectionChange={(id) => console.log(id)} />
-          </div>
+      <div className="flex-1 flex justify-center items-center bg-gray-100 p-2 sm:p-4 overflow-hidden">
+        <div
+          className="bg-white rounded-[2%] shadow-lg p-1 sm:p-2 md:p-4 flex flex-col md:flex-row w-full max-w-full sm:max-w-full md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] h-[80vh] overflow-hidden"
+          style={{ maxHeight: "80vh" }}
+        >
+          {showSidebar && (
+            <div className="lg:w-1/4 border-r border-gray-200 h-full overflow-y-auto">
+              <Sidebar onSectionChange={(id) => console.log(id)} />
+            </div>
+          )}
 
-          <div className="w-3/4 flex">
-            <div className="w-1/3 border-r border-gray-200 flex flex-col">
-              <div className="bg-[#1e1b4b] text-white p-4">
-                <h1 className="text-2xl font-bold mb-4">Chats</h1>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-[#1e1b4b] text-gray-800"
-                  />
-                  <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                {filteredChats.map((chat) => (
-                  <div
-                    key={chat.id}
-                    className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 ${
-                      activeChat === chat.id ? 'bg-gray-100' : ''
-                    }`}
-                    onClick={() => setActiveChat(chat.id)}
-                  >
-                    <div className="relative">
-                      <img
-                        src={chat.avatar}
-                        alt={chat.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                        chat.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
-                      }`} />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">{chat.name}</h3>
-                        <span className="text-xs text-gray-500">{chat.timestamp}</span>
-                      </div>
-                      <p className="text-sm text-gray-500 truncate">
-                        {chat.lastMessage === "Video Call" ? (
-                          <span className="flex items-center">
-                            <Video className="h-3 w-3 mr-1" /> Video Call
-                          </span>
-                        ) : (
-                          chat.lastMessage
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
+            <div className="md:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-[#1e1b4b] text-white">
+              <button onClick={toggleSidebar} className="p-1">
+                <Menu className="h-6 w-6" />
+              </button>
+              <h1 className="text-xl font-bold">Investor Chat</h1>
+              <button onClick={toggleChatList} className="p-1">
+                {showChatList ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
+              </button>
             </div>
 
-            <div className="w-2/3 flex flex-col">
+            {showChatList && (
+              <div className="w-full md:w-1/3 lg:w-1/3 border-r border-gray-200 flex flex-col md:h-full fixed md:relative top-12 md:top-0 bottom-0 left-0 right-0 md:right-auto bg-white z-10 overflow-hidden">
+                <div className="bg-[#1e1b4b] text-white p-4">
+                  <h1 className="text-2xl font-bold mb-4 hidden md:block">Chats</h1>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:border-[#1e1b4b] text-gray-800"
+                    />
+                    <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {filteredChats.map((chat) => (
+                    <div
+                      key={chat.id}
+                      className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 ${
+                        activeChat === chat.id ? 'bg-gray-100' : ''
+                      }`}
+                      onClick={() => {
+                        setActiveChat(chat.id);
+                        if (window.innerWidth < 768) {
+                          setShowChatList(false);
+                        }
+                      }}
+                    >
+                      <div className="relative">
+                        <img
+                          src={chat.avatar}
+                          alt={chat.name}
+                          className="w-10 h-10 rounded-full"
+                        />
+                        <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                          chat.status === 'online' ? 'bg-green-500' : 'bg-gray-500'
+                        }`} />
+                      </div>
+                      <div className="ml-3 flex-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-semibold truncate max-w-[120px] sm:max-w-[180px] md:max-w-[80px] lg:max-w-[120px]">{chat.name}</h3>
+                          <span className="text-xs text-gray-500">{chat.timestamp}</span>
+                        </div>
+                        <p className="text-sm text-gray-500 truncate max-w-[180px] sm:max-w-[240px] md:max-w-[140px] lg:max-w-[180px]">
+                          {chat.lastMessage === "Video Call" ? (
+                            <span className="flex items-center">
+                              <Video className="h-3 w-3 mr-1" /> Video Call
+                            </span>
+                          ) : (
+                            chat.lastMessage
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className={`flex-1 flex flex-col ${!showChatList ? 'w-full' : 'hidden md:flex'} md:relative md:h-full overflow-hidden`}>
               {activeChat ? (
                 <>
                   <div className="bg-[#1e1b4b] text-white p-4 flex items-center justify-between">
                     <div className="flex items-center">
+                      {window.innerWidth < 768 && (
+                        <button 
+                          onClick={toggleChatList} 
+                          className="mr-2 p-1 rounded-full hover:bg-indigo-700"
+                        >
+                          <Search className="h-5 w-5" />
+                        </button>
+                      )}
                       <div className="relative">
                         <img
                           src={chats.find(c => c.id === activeChat)?.avatar}
@@ -562,7 +623,7 @@ const ChatPage = () => {
                         }`} />
                       </div>
                       <div className="ml-3">
-                        <h3 className="font-semibold">
+                        <h3 className="font-semibold truncate max-w-[150px] sm:max-w-[200px]">
                           {chats.find(c => c.id === activeChat)?.name}
                         </h3>
                         <span className={`text-sm ${
@@ -580,7 +641,7 @@ const ChatPage = () => {
                     />
                   </div>
   
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ height: "calc(100% - 130px)" }}>
                     {messages.map((msg, index) => {
                       const isCurrentUser = msg.sender === currentUserId;
                       return (
@@ -591,19 +652,19 @@ const ChatPage = () => {
                           }`}
                         >
                           <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
+                            className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg p-3 ${
                               isCurrentUser
                                 ? 'bg-[#1e1b4b] text-white'
                                 : 'bg-gray-200'
                             }`}
                           >
                             {msg.isVideoCall ? (
-                              <div className="flex items-center space-x-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <Video className={`h-5 w-5 ${isCurrentUser ? 'text-white' : 'text-gray-700'}`} />
                                 <span>Video Call</span>
                                 <button
                                   onClick={() => handleJoinVideoCall(msg.videoLink || '')}
-                                  className={`ml-2 px-2 py-1 rounded ${
+                                  className={`px-2 py-1 rounded ${
                                     isCurrentUser ? 'bg-indigo-700 hover:bg-indigo-800' : 'bg-indigo-500 hover:bg-indigo-600 text-white'
                                   } transition-colors text-sm flex items-center`}
                                 >
@@ -612,7 +673,7 @@ const ChatPage = () => {
                                 </button>
                               </div>
                             ) : (
-                              <p>{msg.message}</p>
+                              <p className="break-words">{msg.message}</p>
                             )}
                             <span
                               className={`text-xs ${
@@ -627,7 +688,7 @@ const ChatPage = () => {
                     })}
                   </div>
   
-                  <div className="p-4 border-t border-gray-200">
+                  <div className="p-2 sm:p-4 border-t border-gray-200 bg-white">
                     <div className="flex items-center space-x-2">
                       <input
                         type="text"
@@ -652,8 +713,22 @@ const ChatPage = () => {
                   </div>
                 </>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-gray-500">
-                  Select a chat to start messaging
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 p-4">
+                  <img 
+                    src={shortlogo} 
+                    alt="Logo" 
+                    className="w-16 h-16 mb-4 opacity-50"
+                  />
+                  <p className="text-center">Select a chat to start messaging</p>
+                  {window.innerWidth < 768 && !showChatList && (
+                    <button
+                      onClick={toggleChatList}
+                      className="mt-4 p-2 bg-[#1e1b4b] text-white rounded-lg hover:bg-[#29256d] focus:outline-none transition-colors flex items-center"
+                    >
+                      <Search className="h-5 w-5 mr-2" />
+                      View Chats
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -105,7 +105,7 @@ const Addmodel: React.FC = () => {
         });
 
         const response = await api.get(`/entrepreneur/category`);
-        console.log(response.data.data); // Debugging
+        console.log(response.data.data); 
         if (response.data.success) {
           setCategory(response.data.data)
           console.log(category)

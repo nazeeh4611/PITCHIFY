@@ -6,11 +6,11 @@ import {useDispatch} from "react-redux"
 import { EntrepreneurAuth } from "../../Redux/EntrepreneurTokenSlice";
 import { InvestorAuth } from "../../Redux/InvestorTokenSlice";
 interface OtpInputProps {
-  length?: number; // Default OTP length: 4
+  length?: number; 
 }
 
 const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
-  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; // Determine user type
+  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur";
   const queryParams = new URLSearchParams(location.search);
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -20,7 +20,6 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
 
 
 
-  // Timer Countdown Effect
   useEffect(() => {
     const interval = setInterval(() => {
       setTimer((prev) => (prev > 0 ? prev - 1 : 0));
@@ -28,7 +27,6 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle Input Change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value.slice(-1); 
     const newOtp = [...otp];
@@ -36,14 +34,13 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
     setOtp(newOtp);
 
     if (value && index < length - 1) {
-      inputRefs.current[index + 1]?.focus(); // Move to next input
+      inputRefs.current[index + 1]?.focus(); 
     }
   };
 
-  // Handle Key Down for Backspace
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus(); // Move to previous input
+      inputRefs.current[index - 1]?.focus(); 
     }
   };
 
@@ -65,7 +62,6 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
       if (response && response.data.token) {
         console.log(response.data.token, "this is the token");
   
-        // Dispatch token to Redux
 
         if(userType == "entrepreneur"){
           dispatch(
@@ -82,7 +78,6 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
         }
       
   
-        // Navigate to the login page
         navigate(`/${userType}/profile`);
       }
     } catch (error) {
@@ -137,7 +132,6 @@ const Otp: React.FC<OtpInputProps> = ({ length = 4 }) => {
               ))}
             </div>
             <button
-              // Removed submit functionality
               className="bg-indigo-800 text-white font-semibold py-2 rounded-md w-full hover:bg-indigo-900 transition"   
               style={{ background: "#00186E" }}
             onClick={handleSubmit} >

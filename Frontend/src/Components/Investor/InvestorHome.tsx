@@ -63,6 +63,7 @@ const InvestorHome = () => {
     premium: undefined
   }); 
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [originalOrder, setOriginalOrder] = useState<string[]>([]);
 
   const token = useGetToken("investor");
   const email = token?.email;
@@ -88,6 +89,8 @@ const InvestorHome = () => {
         }
 
         setCategory(categories);
+        // Store the original order of category IDs
+        setOriginalOrder(categories.map(cat => cat._id));
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -127,12 +130,19 @@ const InvestorHome = () => {
     setVisibleCategoriesCount(prev => prev === 8 ? category.length : 8);
   };
 
-  const handleCategoryClick = (categoryId: string, index: number) => {
-    if (!hasPremium && index >= 2) {
+  // Determine if a category should be locked based on its position in the original order
+  const isCategoryLocked = (categoryId: string) => {
+    if (hasPremium) return false;
+    const originalIndex = originalOrder.indexOf(categoryId);
+    return originalIndex >= 2;
+  };
+
+  const handleCategoryClick = (category: Category) => {
+    if (isCategoryLocked(category._id)) {
       setShowPremiumModal(true);
       return;
     }
-    navigate(`/investor/models?category=${categoryId}`);
+    navigate(`/investor/models?category=${category._id}`);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,29 +240,33 @@ const InvestorHome = () => {
                 Filter by Category
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {filteredCategories.slice(0, visibleCategoriesCount).map((category, index) => (
-                  <div
-                    key={category._id}
-                    className={`relative flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-lg cursor-pointer ${
-                      !hasPremium && index >= 2 ? 'opacity-75' : ''
-                    }`}
-                    onClick={() => handleCategoryClick(category._id, index)}
-                  >
-                    <img
-                      src={category.image}
-                      alt={category.categoryname}
-                      className="w-20 h-20 object-contain mb-4"
-                    />
-                    <p className="text-center text-gray-700 font-medium">
-                      {category.categoryname}
-                    </p>
-                    {!hasPremium && index >= 2 && (
-                      <div className="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center rounded-lg">
-                        <Lock className="w-8 h-8 text-gray-600" />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {filteredCategories.slice(0, visibleCategoriesCount).map((cat) => {
+                  const isLocked = isCategoryLocked(cat._id);
+                  
+                  return (
+                    <div
+                      key={cat._id}
+                      className={`relative flex flex-col items-center bg-white p-4 rounded-lg shadow hover:shadow-lg ${
+                        isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
+                      }`}
+                      onClick={() => handleCategoryClick(cat)}
+                    >
+                      <img
+                        src={cat.image}
+                        alt={cat.categoryname}
+                        className={`w-20 h-20 object-contain mb-4 ${isLocked ? 'opacity-50' : ''}`}
+                      />
+                      <p className={`text-center text-gray-700 font-medium ${isLocked ? 'text-opacity-50' : ''}`}>
+                        {cat.categoryname}
+                      </p>
+                      {isLocked && (
+                        <div className="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center rounded-lg">
+                          <Lock className="w-8 h-8 text-gray-600" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
               {filteredCategories.length > 8 && (
                 <div className="mt-6 text-center">

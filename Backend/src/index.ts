@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 import { connectDB } from './Infrastructure/Database/Connection/Db';
 import { createServer } from 'http';
 import { Server } from 'socket.io'; 
+import "./Infrastructure/Jobs/Cronjob";
+
 
 dotenv.config();
 
