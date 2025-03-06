@@ -155,8 +155,7 @@ const BusinessModelsPage: React.FC = () => {
   const token = useGetToken("investor");
   const email = token?.email;
   
-  const hasPremium = profile.premium !== undefined;
-
+  const hasPremium = profile.premium ? Object.keys(profile.premium).length > 0 : false;
   const getModels = async () => {
     try {
       const queryParams = new URLSearchParams(location.search);
@@ -196,8 +195,6 @@ const BusinessModelsPage: React.FC = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-
-      console.log(response,"this be the response ")
 
       if (response.data.investor.Investor) {
         setProfile(response.data.investor.Investor);
@@ -269,23 +266,6 @@ const BusinessModelsPage: React.FC = () => {
       <div id="search-section" className="bg-gradient-to-r from-indigo-50 to-purple-50 pb-6 sm:pb-8 pt-6 sm:pt-10 px-4 sm:px-6 shadow-sm">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col gap-5 sm:gap-8">
-            {/* <div className="flex items-center justify-center sm:justify-between">
-              {hasPremium ? (
-                <div className="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full flex items-center gap-2 text-sm sm:text-base shadow-md">
-                  <span className="text-yellow-300 text-xl">★</span>
-                  <span className="font-medium">Premium Member</span>
-                </div>
-              ) : (
-                <button 
-                  onClick={() => navigate('/investor/pricing')}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full flex items-center gap-2 hover:shadow-lg transition-all text-sm sm:text-base transform hover:scale-105 duration-300 shadow-md"
-                >
-                  <span className="text-yellow-300 text-xl">★</span>
-                  <span className="font-medium">Upgrade to Premium</span>
-                </button>
-              )}
-            </div> */}
-            
             <div className="relative max-w-3xl w-full mx-auto">
               <div className="flex w-full rounded-full overflow-hidden shadow-md bg-white">
                 <input
