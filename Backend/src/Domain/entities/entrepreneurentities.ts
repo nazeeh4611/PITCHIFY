@@ -15,6 +15,7 @@ export interface IEntrepreneurdata {
   tempreg: boolean;
   businessModels: Types.ObjectId[]; 
   profile:string;
+  is_google:boolean;
   premium:{
     plan: Types.ObjectId;
     startDate:Date;   
@@ -36,6 +37,7 @@ export class Entrepreneur implements IEntrepreneurdata {
   tempreg: boolean;
   businessModels: Types.ObjectId[]; 
   profile:string;
+  is_google: boolean;
   premium:{
     plan: Types.ObjectId;
     startDate:Date;   
@@ -59,6 +61,7 @@ export class Entrepreneur implements IEntrepreneurdata {
     this.tempreg = data.tempreg ?? true;
     this.businessModels = data.businessModels ?? []; 
     this.profile = data.profile!
+    this.is_google = data.is_google ?? false;
     this.premium = data.premium!;
   }
 
@@ -78,6 +81,7 @@ export class Entrepreneur implements IEntrepreneurdata {
       tempreg: this.tempreg,
       businessModels: this.businessModels, 
       profile:this.profile,
+      is_google:this.is_google,
       premium:this.premium,
     };
   }

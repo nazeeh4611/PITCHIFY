@@ -1,9 +1,8 @@
 import { IInvestordata } from "../Database/Model/Investormodel";
-import { ChatModel, InvestorModel } from "../Database/Model";
+import { ChatModel, InvestorModel,BusinessModel } from "../Database/Model";
 import { IInvestorRepository } from "../../Domain/Interface/InvestorInterface";
 import { Investor } from "../../Domain/entities";
 import { IModelData } from "../../Domain/entities/modelentities";
-import {BusinessModel} from "../Database/Model"
 import {ReviewModel} from "../Database/Model"
 import { IChatData } from "../../Domain/entities";
 import { Types } from "mongoose";
@@ -12,7 +11,7 @@ export class InvestorRepository implements IInvestorRepository {
     async findbyEmail(email: string): Promise<IInvestordata | null> {
         try {
             return await InvestorModel.findOne({ email })
-                .populate('premium.plan') 
+                .populate('premium.plan').populate("savedmodel")
                 .exec(); 
         } catch (error) {
             throw new Error(`Error occurred while searching for investor with email: ${email}`);
@@ -155,6 +154,55 @@ export class InvestorRepository implements IInvestorRepository {
             return null;
         }
     }
+
+    async savemodel(email:string,modelId:string):Promise<IInvestordata | null>{
+        try {
+            const investordata = await InvestorModel.findOneAndUpdate(
+                {email:email},
+                {$push:{savedmodel:modelId}},
+                {new:true}
+            )
+
+            console.log(investordata,"in repo")
+            return investordata
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
+    async unsavemodel(email: string, modelId: string): Promise<IInvestordata | null> {
+        try {
+            const investordata = await InvestorModel.findOneAndUpdate(
+                { email: email },
+                { $pull: { savedmodel: modelId } },
+                { new: true }
+            );
+    
+            console.log(investordata, "in repo");
+            return investordata;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+    
+
+    async exclusiveModel(): Promise<IModelData[] | null> {
+        try {
+            const modelData = await BusinessModel.find()
+                .sort({ createdAt: -1 }) 
+                .limit(10)
+                .lean<IModelData[]>();
+    
+            return modelData;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            return null;
+        }
+    }
+    
+    
     
       
     

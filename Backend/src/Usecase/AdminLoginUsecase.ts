@@ -15,9 +15,9 @@ export class AdminLoginUsecase {
         }
 
         const admin = await this.loginRepository.findEmail(email)
-
-       
+       console.log(admin?.is_Admin,"issiissi")
         if(admin?.is_Admin){
+            console.log("inside")
             const ispassValid = await verifypass(password,admin.password)
             if(!ispassValid){
                 return {success:false,message:"invalid password"};

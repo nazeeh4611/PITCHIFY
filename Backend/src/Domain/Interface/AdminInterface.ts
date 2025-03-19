@@ -1,6 +1,6 @@
 import { IInvestordata } from "../../Infrastructure/Database/Model/Investormodel";
 import { IEntrepreneurdata } from "../../Infrastructure/Database/Model/Entrepreneurmodel";
-import { ICategoryData } from "../../Domain/entities";
+import { ICategoryData, IModelData } from "../../Domain/entities";
 import { IPremium } from "../../Domain/entities";
 import { Category } from "../../Domain/entities";
 import { Types } from "mongoose";
@@ -16,4 +16,6 @@ export interface Iadminrepository {
     investorDetails(id:string):Promise<IInvestordata | null>
     investorupdatestatus(status:string,email:string):Promise<IInvestordata |null>
     getAllpremium():Promise<IPremium[] | null>
+    entrepreneurModels(id:string):Promise<any>
+    modelDetails(id:string):Promise<IModelData | null>
 }

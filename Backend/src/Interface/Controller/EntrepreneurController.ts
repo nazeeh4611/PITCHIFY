@@ -17,7 +17,8 @@ import { signupUsecase,
     EntrepreneurGetMessageUsecase,
     EntrepreneurMessageUseCase,
     GetInvestorUsecase,
-    EntrepreneurCreateChatUseCase
+    EntrepreneurCreateChatUseCase,
+    GoogleAuthUsecase
 } from '../../Usecase'
 import { Types } from 'mongoose';
 
@@ -40,7 +41,8 @@ export class EntrepreneurController {
         private getmessageusecase:EntrepreneurGetMessageUsecase,
         private sendmessagusecase:EntrepreneurMessageUseCase,
         private getinvestorusecase:GetInvestorUsecase,
-        private createChatusecase:EntrepreneurCreateChatUseCase
+        private createChatusecase:EntrepreneurCreateChatUseCase,
+        private googleauthusecase:GoogleAuthUsecase
     ) {}
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -115,7 +117,6 @@ export class EntrepreneurController {
           }
 
        const response =  await this.loginusecase.execute(email,password)
-
        if(response){
 
         const token = response.token
@@ -139,9 +140,27 @@ export class EntrepreneurController {
 
     async googleLogin(req:Request,res:Response,next:NextFunction):Promise<void>{
         try {
-            console.log(req.body)
+            const {email,token,user} = req.body
+  
+             const response = await this.googleauthusecase.execute(token,user)
+             if(response){
+      
+              const token = response.token
+              const refreshToken = response.refreshToken
+      
+              res.cookie('refreshToken', refreshToken, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production', 
+                  maxAge: 7 * 24 * 60 * 60 * 1000 
+              });
+      
+              res.status(200).json({sucess:true,token})
+             }
+        
+             
         } catch (error) {
-            
+            console.error(error)
+            res.status(500).json({message:"Internal server error"})
         }
     }
 
@@ -388,14 +407,12 @@ export class EntrepreneurController {
       async createChat(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { entrepreneurId, investorId } = req.body;
-           console.log(req.body,"the body data")
     
             const { chatId } = await this.createChatusecase.execute({
                 entrepreneurId,
                 investorId,
             });
     
-            console.log(chatId)
             if (!chatId) {
                 res.status(500).json({ 
                     message: "Failed to create or find chat" 

@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { entrepreneurrouter } from './Interface/Route/EntrepreneurRoute';
 import { InvestorRouter } from './Interface/Route/InvestorRoute';
 import { AdminRouter } from './Interface/Route/AdminRoute';
+import Chatrouter from "./Interface/Route/ChatRoute"
 import dotenv from 'dotenv';
 import { connectDB } from './Infrastructure/Database/Connection/Db';
 import { createServer } from 'http';
@@ -40,6 +41,10 @@ app.use('/api/investor', InvestorRouter);
 
 // Admin Route
 app.use('/api/admin', AdminRouter);
+
+
+app.use('/api/chat', Chatrouter);
+
 
 const server = createServer(app);
 

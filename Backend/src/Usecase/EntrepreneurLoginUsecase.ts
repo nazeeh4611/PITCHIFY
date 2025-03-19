@@ -21,7 +21,7 @@ async execute(email:string,password:string):Promise<any>{
 
 
     if(entrepreneur.is_Blocked == true){
-        return {success:false,message:"acount is bloacked"}
+        return {success:false,message:"acount is blocked"}
     }
 
     const ispassValid = await verifypass(password,entrepreneur.password);

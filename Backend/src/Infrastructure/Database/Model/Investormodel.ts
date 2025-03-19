@@ -17,6 +17,9 @@ export interface IInvestordata extends Document {
     companyname:string;
     status:string;
     isApproved:boolean;
+    profile:string;
+    is_google:boolean;
+    savedmodel:Types.ObjectId[]
     premium:{
         plan: Types.ObjectId;
         startDate:Date;
@@ -41,6 +44,9 @@ const InvestorSchema = new Schema<IInvestordata>(
         companyname:{type:String,default:""},
         status:{type:String,default:"not approved"},
         isApproved:{type:Boolean,default:false},
+        profile:{type:String},
+        is_google:{type:Boolean,default:false},
+        savedmodel: [{ type: Schema.Types.ObjectId, ref: "BusinessModel" }],
         premium:{
             plan: { type: Schema.Types.ObjectId, ref: "SubscriptionPlan" },
             startDate: { type: Date },

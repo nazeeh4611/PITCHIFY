@@ -15,6 +15,7 @@ export interface IEntrepreneurdata extends Document {
     tempreg: boolean;
     businessModels: Types.ObjectId[]; 
     profile:string;
+    is_google:boolean;
     premium:{
         plan: Types.ObjectId;
         startDate:Date;
@@ -37,6 +38,7 @@ const EntrepreneurSchema = new Schema<IEntrepreneurdata>(
         tempreg: { type: Boolean, default: true },
         businessModels: [{ type: Schema.Types.ObjectId, ref: "BusinessModel" }],
         profile:{type:String},
+        is_google:{type:Boolean},
         premium:{
             plan: { type: Schema.Types.ObjectId, ref: "SubscriptionPlan" },
             startDate: { type: Date },

@@ -16,7 +16,8 @@ import { EntrepreneurController } from "../Controller/EntrepreneurController";
   EntrepreneurGetMessageUsecase,
   EntrepreneurMessageUseCase,
   GetInvestorUsecase,
-  EntrepreneurCreateChatUseCase
+  EntrepreneurCreateChatUseCase,
+  GoogleAuthUsecase
 } from "../../Usecase";
 import { OtpService } from '../../Infrastructure/service/Otpservice';
 import { S3Client } from "@aws-sdk/client-s3"; 
@@ -25,6 +26,7 @@ import multerS3 from "multer-s3";
 import { entrepreneurRepository } from '../../Infrastructure/Repository';
 import { ChatRepositoryImpl } from '../../Infrastructure/Repository/ChatRepository';
 import { AdminRepository } from "../../Infrastructure/Repository";
+import { InvestorRepository} from "../../Infrastructure/Repository";
 import {MessageRepositoryImpl} from "../../Infrastructure/Repository/MessageRepository"
 
 const router = Router();
@@ -70,6 +72,7 @@ const s3Client = new S3Client({
 
 const entrepreneurRepositoryInstance = new entrepreneurRepository();
 const adminrepositoryInstance = new AdminRepository()
+const investorrepositoryinstance = new InvestorRepository()
 const ChatRepositoryInstance = new ChatRepositoryImpl()
 const MessageRepositoryInstance = new MessageRepositoryImpl()
 const Otpserviceinstance = new OtpService();
@@ -90,6 +93,7 @@ const EntrepreneurCreateChatUseCaseInstance = new EntrepreneurCreateChatUseCase(
 
 const EntrepreneurGetMessageUsecaseInstance = new EntrepreneurGetMessageUsecase(MessageRepositoryInstance)
 const GetInvestorUsecaseInstance = new GetInvestorUsecase(adminrepositoryInstance)
+const GoogleAuthUsecaseInstance = new GoogleAuthUsecase(investorrepositoryinstance,entrepreneurRepositoryInstance)
 const EntrepreneurMessageUseCaseInstance = new EntrepreneurMessageUseCase(MessageRepositoryInstance,ChatRepositoryInstance,entrepreneurRepositoryInstance)
 const EntrepreneurControllerInstance = new EntrepreneurController(
      signupusecaseinstance,
@@ -108,7 +112,8 @@ const EntrepreneurControllerInstance = new EntrepreneurController(
      EntrepreneurGetMessageUsecaseInstance,
      EntrepreneurMessageUseCaseInstance,
      GetInvestorUsecaseInstance,
-     EntrepreneurCreateChatUseCaseInstance
+     EntrepreneurCreateChatUseCaseInstance,
+     GoogleAuthUsecaseInstance
      );
 router.post("/register", (req, res, next) => {
     EntrepreneurControllerInstance.signup(req, res, next);
@@ -183,5 +188,7 @@ router.get("/get-investors",(req,res,next)=>{
 router.post("/create-chat",(req,res,next)=>{
   EntrepreneurControllerInstance.createChat(req,res,next)
 })
+
+
 
 export { router as entrepreneurrouter };

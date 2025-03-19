@@ -17,7 +17,7 @@ function Homepage() {
         shortLogoUrl={shortlogo}
         links={[
           { label: 'Home', href: '/' },
-          { label: 'Explore Premium', href: '/explore-premium' },
+          { label: 'Explore Premium', href: '/select' },
           { label: 'About Us', href: '/about-us' },
           { label: 'Login', href: '/select' },
         ]}

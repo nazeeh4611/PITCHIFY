@@ -25,6 +25,11 @@ const Category: React.FC = () => {
     image: null,
   });
   const [editCategory, setEditCategory] = useState<FetchedCategory | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   const getCategories = async () => {
     try {
@@ -160,13 +165,27 @@ const Category: React.FC = () => {
 
   return (
     <>
-      <Adminnav />
-      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col lg:flex-row w-full max-w-6xl space-y-6 lg:space-y-0 lg:space-x-6">
+      <Adminnav toggleSidebar={toggleSidebar} />
+      
+      {/* Mobile Sidebar */}
+      <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={toggleSidebar}>
+      </div>
+      <div className={`fixed left-0 top-0 h-full w-64 bg-gray-100 z-50 transform transition-transform duration-300 md:hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="pt-16 px-4 h-full">
           <Sidebar />
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gray-100 p-4 pt-20">
+        <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col md:flex-row w-full max-w-6xl">
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block w-1/4 md:mr-6">
+            <Sidebar />
+          </div>
 
           <div
-            className="flex-1 bg-white rounded-lg shadow-lg p-6 space-y-4"
+            className="w-full md:flex-1 bg-white rounded-lg shadow-lg p-4 md:p-6 space-y-4"
             style={{
               height: "80vh",
               overflowY: "auto",
@@ -186,12 +205,13 @@ const Category: React.FC = () => {
               {categories.map((category) => (
                 <div
                   key={category._id}
-                  className="p-2 flex items-center shadow-md border rounded-lg"
+                  className="p-2 flex flex-col sm:flex-row items-start sm:items-center shadow-md border rounded-lg"
                   style={{
-                    height: "4rem",
+                    height: "auto",
+                    minHeight: "4rem",
                   }}
                 >
-                  <div className="flex items-center space-x-3 w-1/3">
+                  <div className="flex items-center space-x-3 w-full sm:w-1/3 mb-2 sm:mb-0">
                     <img
                       src={category.image}
                       alt={category.categoryname}
@@ -202,7 +222,7 @@ const Category: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="ml-auto flex space-x-2">
+                  <div className="ml-auto flex flex-col sm:flex-row space-x-0 sm:space-x-2 space-y-2 sm:space-y-0 w-full sm:w-auto">
                     <button
                       className={`${
                         category.is_Listed ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
@@ -227,7 +247,7 @@ const Category: React.FC = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full sm:w-96">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
             <h3 className="text-lg font-semibold mb-4">{editCategory ? "Edit Category" : "Add New Category"}</h3>
             <div className="space-y-4">
               <div>

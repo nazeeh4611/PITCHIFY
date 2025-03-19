@@ -90,3 +90,49 @@ export interface DecodedToken {
     videoLink?: string;
   }
   
+  export interface PremiumPlanState {
+    planName: string;
+    Duration: number; 
+    planPrice: number;
+    description: string; 
+    features: string[];
+    buttonText: string;
+  }
+
+
+  export interface FetchedPremiumPlan {
+    _id: string;
+    planName: string;
+    Duration: number;
+    planPrice: number;
+    description: string; 
+    is_Listed: boolean;
+    features: string[]; 
+    buttonText: string;  
+  }
+
+
+  export interface BusinessModel {
+    _id: string;
+    businessName: string;
+    tagline: string;
+    fundinggoal: string;
+    targetAudience: string;
+    solution: string;
+    problemStatement: string;
+    useOfFunds: string;
+    marketOpportunities: string;
+    teamexpertise: string;
+    pitchvideo: string;
+    industryFocus: {
+      categoryname: string;
+      image: string;
+      is_Listed: boolean;
+    };
+    createdAt: string;
+    uploadedentrepreneur: {
+      profile: string;
+      firstname: string;
+      _id: string;
+    };
+  }

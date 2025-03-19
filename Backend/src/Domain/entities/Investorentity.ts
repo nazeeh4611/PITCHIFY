@@ -17,6 +17,9 @@ export interface IInvestordata {
   companyname:string;
   status:string;
   isApproved:boolean; 
+  profile:string;
+  is_google:boolean;
+  savedmodel:Types.ObjectId[];
   premium:{
     plan: Types.ObjectId;
     startDate:Date;   
@@ -41,6 +44,9 @@ export class Investor implements IInvestordata {
   companyname:string;
   status:string;
   isApproved:boolean; 
+  profile: string;
+  is_google: boolean;
+  savedmodel:Types.ObjectId[];
   premium:{
     plan: Types.ObjectId;
     startDate:Date;   
@@ -67,6 +73,9 @@ export class Investor implements IInvestordata {
     this.companyname = data.companyname ?? "";
     this.status = data.status ?? "not approved";
     this.isApproved = data.isApproved ?? false;
+    this.profile = data.profile!;
+    this.is_google = data.is_google ?? false;
+    this.savedmodel = data.savedmodel ?? [];
     this.premium = data.premium!;
   }
 
@@ -88,6 +97,9 @@ export class Investor implements IInvestordata {
       companyname:this.companyname,
       status:this.status,
       isApproved:this.isApproved,
+      profile:this.profile,
+      is_google:this.is_google,
+      savedmodel:this.savedmodel,
       premium:this.premium
     };
   }

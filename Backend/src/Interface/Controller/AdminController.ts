@@ -14,7 +14,9 @@ import { AdminLoginUsecase,
     AdminInvestorDetailsusecase,
     InvestorstatusUsecase,
     Addplanusecase,
-    Getplanusecase
+    Getplanusecase,
+    AdminEntrepreneurModels,
+    Adminmodeldetails
 } from "../../Usecase";
 import { Types } from "mongoose";
 
@@ -31,7 +33,9 @@ export class AdminController {
         private investordetailsusecase:AdminInvestorDetailsusecase,
         private statususecase:InvestorstatusUsecase,
         private addplanusecase:Addplanusecase,
-        private getplanusecase:Getplanusecase
+        private getplanusecase:Getplanusecase,
+        private entrepreneurmodelusecase:AdminEntrepreneurModels,
+        private adminmodeldetailsusecase:Adminmodeldetails
     ){}
 
 
@@ -43,6 +47,7 @@ export class AdminController {
                 return
             }
             const response = await this.loginusecase.execute(email,password)
+            console.log(response)
             const token = response.token
             res.status(200).json({success:true,token})
         } catch (error) {
@@ -85,10 +90,8 @@ export class AdminController {
     async InvestorVerify(req:Request,res:Response,next:NextFunction):Promise<void>{
         try {
             const {status,email} =req.body
-            console.log(status,email,"eii")
 
             const response = await this.statususecase.execute(status,email)
-            console.log(response)
             res.status(200).json(response)
         } catch (error) {
             
@@ -189,7 +192,11 @@ export class AdminController {
 
    async addPlan(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const { name, duration, price, description } = req.body;
+
+        const {description } = req.body;
+        const name = req.body.planName
+        const price = req.body.planPrice
+        const duration = req.body.Duration
 
         if (!name || !duration || !price || !description) {
             res.status(400).json({ success: false, message: "All fields are required" });
@@ -198,7 +205,6 @@ export class AdminController {
 
         const response = await this.addplanusecase.execute(name, description, price, duration);
 
-        console.log(response, "respo");
 
         res.status(200).json({
             success: true,
@@ -215,10 +221,33 @@ export class AdminController {
   async getPlans(req:Request,res:Response,next:NextFunction):Promise<void>{
     try {
         const response = await this.getplanusecase.execute()
-        console.log(response,"this be the response for plans")
         res.status(200).json(response)
     } catch (error) {
         
+    }
+  }
+
+  async GetentreprenuerModel(req:Request,res:Response,next:NextFunction):Promise<void>{
+    try {
+        const id = req.params.id
+
+        const response = await this.entrepreneurmodelusecase.execute(id)
+        res.status(200).json(response)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message:"Internal server error"})
+    }
+  }
+
+  async modelDetails(req:Request,res:Response,next:NextFunction):Promise<void>{
+    try {
+        const id = req.params.id
+         console.log(id)
+        const response = await this.adminmodeldetailsusecase.execute(id)
+        res.status(200).json(response)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message:"Internal server error"})
     }
   }
 

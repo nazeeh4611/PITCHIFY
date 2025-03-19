@@ -130,7 +130,6 @@ const InvestorHome = () => {
     setVisibleCategoriesCount(prev => prev === 8 ? category.length : 8);
   };
 
-  // Determine if a category should be locked based on its position in the original order
   const isCategoryLocked = (categoryId: string) => {
     if (hasPremium) return false;
     const originalIndex = originalOrder.indexOf(categoryId);
@@ -184,7 +183,7 @@ const InvestorHome = () => {
         shortLogoUrl={shortlogo}
         links={[
           { label: "Home", href: "/investor" },
-          { label: "Explore Premium", href: "/explore-premium" },
+          { label: "Explore Premium", href: "/investor/plan-details" },
           { label: "About Us", href: "/about-us" },
           { label: "Profile", href: "/investor/profile" },
         ]}

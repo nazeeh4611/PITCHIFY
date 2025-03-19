@@ -128,6 +128,8 @@ const EntrepreneurProfile = (): JSX.Element => {
         }
       );
 
+      console.log(response,"this ne the response")
+
       if (response.data) {
         const userData = response.data.entrepreneur;
         const userWithAvatar = {

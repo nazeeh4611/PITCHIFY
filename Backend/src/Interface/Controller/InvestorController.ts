@@ -15,7 +15,11 @@ import { InvestorSignupusecase,
     CreateChatUseCase,
     MessageUseCase,
     getReciever,
-    getAllchatusecase
+    getAllchatusecase,
+    GoogleAuthUsecase,
+    savemodelUsecase,
+    UnsavemodelUsecase,
+    exclusivemodelUsecase,
 } from '../../Usecase'
 import * as CryptoJS from 'crypto-js';
 import { generateRefreshToken,generateToken } from '../Middleware/tokenauth';
@@ -49,7 +53,11 @@ export class InvestorController{
         private createChatUseCase:CreateChatUseCase,
         private MessageUseCase:MessageUseCase,
         private getReciever:getReciever,
-        private getchatsusecase:getAllchatusecase
+        private getchatsusecase:getAllchatusecase,
+        private googleauthusecase:GoogleAuthUsecase,
+        private savemodelusecase:savemodelUsecase,
+        private unsavemodelusecase:UnsavemodelUsecase,
+        private exclusivemodelusecase:exclusivemodelUsecase
         ){
             const secret = process.env.JWT_SECRET
             const refreshSecret = process.env.JWT_REFRESHSECRET
@@ -110,6 +118,32 @@ export class InvestorController{
         }
     }
 
+
+    async googleLogin(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            const {token,user} = req.body
+  
+             const response = await this.googleauthusecase.execute(token,user)
+             if(response){
+      
+              const token = response.token
+              const refreshToken = response.refreshToken
+      
+              res.cookie('refreshToken', refreshToken, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production', 
+                  maxAge: 7 * 24 * 60 * 60 * 1000 
+              });
+      
+              res.status(200).json({sucess:true,token})
+             }
+        
+             
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({message:"Internal server error"})
+        }
+    }
 
     async verifyOtp(req:Request,res:Response,next:NextFunction):Promise <void>{
         try {
@@ -340,7 +374,6 @@ export class InvestorController{
 
 async addMessage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        console.log(req.body);
         const { sender, chatId, message, receiverId, timestamp } = req.body;
         
         const data = {
@@ -352,7 +385,6 @@ async addMessage(req: Request, res: Response, next: NextFunction): Promise<void>
         };
 
         const response = await this.MessageUseCase.sendMessage(data);
-        console.log(response,"this be the response getting in nsend messag controler")
         res.status(200).json(response)
     } catch (error) {
         console.error("Error in addMessage:", error);
@@ -364,7 +396,6 @@ async message(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { chatId } = req.params;
 
-        console.log("the id may here",chatId)
 
         if (!chatId) {
             res.status(400).json({ success: false, message: "Chat ID is required" });
@@ -372,7 +403,6 @@ async message(req: Request, res: Response, next: NextFunction): Promise<void> {
         }
 
         const messages = await this.MessageUseCase.getChatMessages(chatId);
-        console.log(messages,"this be teh messeges")
 
         res.status(200).json({ success: true, messages });
     } catch (error) {
@@ -399,14 +429,51 @@ async getMessageReciever(req:Request,res:Response,next:NextFunction):Promise<voi
 async getChat(req:Request,res:Response,next:NextFunction):Promise<void>{
     try {
         const id = req.params.id
-        console.log(id)
          const response = await this.getchatsusecase.execute(id)
 
-        //  console.log(response,"get chat controller")
          res.status(200).json({success:true,response})
     } catch (error) {
         
     }
 }
 
+async savemodel(req:Request,res:Response,next:NextFunction):Promise<void>{
+    try {
+        const {email,model} = req.body
+        
+        const response = await this.savemodelusecase.execute(email,model)
+        res.status(200).json(response)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({messaage:"Internal server error"})
+    }
 }
+
+async unsavemodel(req:Request,res:Response,next:NextFunction):Promise<void>{
+   try {
+    const {email,model} = req.body
+
+    const response = await this.unsavemodelusecase.execute(email,model)
+
+    res.status(200).json(response)
+   } catch (error) {
+    console.error(error)
+     res.status(500).json({messaage:"Internal server error"})
+   }
+}
+
+async exclusivemodel(req:Request,res:Response,next:NextFunction):Promise<void>{
+    try {
+        const response = await this.exclusivemodelusecase.execute()
+
+        res.status(200).json(response)
+    } catch (error) {
+        
+    }
+}
+
+
+}
+
+
+

@@ -6,8 +6,10 @@ import { IEntrepreneurdata } from "../Database/Model/Entrepreneurmodel";
 import { Iadminrepository } from "../../Domain/Interface/AdminInterface";
 import { ICategoryData } from "../../Domain/entities";
 import {CategoryModel} from "../Database/Model"
+import {BusinessModel} from "../Database/Model"
 import { Category } from "../../Domain/entities";
 import { IPremium} from "../../Domain/entities";
+import { IModelData} from "../../Domain/entities";
 import { Types } from "mongoose";
 
 export class AdminRepository implements Iadminrepository {
@@ -150,7 +152,26 @@ async getAllpremium(): Promise<IPremium[] | null> {
     return plans.length > 0 ? plans : null;
   } catch (error) {
     console.error("Error occurred in getAllpremium:", error);
-    return null; // Explicitly return null in case of an error
+    return null;
+  }
+}
+async entrepreneurModels(id: string){
+  try {
+    const models = await BusinessModel.find({ uploadedentrepreneur: id }).lean();
+    console.log(models, "in repository");
+    return models; 
+  } catch (error) {
+    console.error("Error fetching entrepreneur models:", error);
+    return []; 
+  }
+}
+
+async modelDetails(id:string):Promise<IModelData | null>{
+  try {
+      const details = await BusinessModel.findById(id)
+      return details as unknown as IModelData
+  } catch (error) {
+      return null
   }
 }
 

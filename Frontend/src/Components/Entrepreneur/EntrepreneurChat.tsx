@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Video, Search, ExternalLink, Menu, X } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,6 +30,8 @@ const EntrepreneurChat = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showChatList, setShowChatList] = useState(true);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { id } = useParams();
   const token = useGetToken("entrepreneur");
@@ -40,6 +42,10 @@ const EntrepreneurChat = () => {
     baseURL: baseurl,
     headers: { 'Content-Type': 'application/json' }
   });
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const formatDateTime = (dateString?: string) => {
     const date = dateString ? new Date(dateString) : new Date();
@@ -338,6 +344,10 @@ const EntrepreneurChat = () => {
   }, [activeChat]);
 
   useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
     const newSocket = io("http://localhost:3009");
     setSocket(newSocket);
 
@@ -443,7 +453,7 @@ const EntrepreneurChat = () => {
             height: "80vh",
           }}
         >
-        <div className="hidden md:block md:w-1/4 border-r border-gray-200">
+<div className="hidden md:block md:w-1/4 border-r border-gray-200">
           <Sidebar onSectionChange={(id) => console.log(id)} />
         </div>
 
@@ -665,6 +675,7 @@ const EntrepreneurChat = () => {
                       </div>
                     );
                   })}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 <div className="p-2 sm:p-4 border-t border-gray-200">

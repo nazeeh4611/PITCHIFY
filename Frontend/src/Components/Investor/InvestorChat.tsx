@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Send, Video, Search, ExternalLink, Menu, X } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
@@ -67,6 +67,7 @@ const ChatPage = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showChatList, setShowChatList] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const api = axios.create({
     baseURL: baseurl,
@@ -77,6 +78,14 @@ const ChatPage = () => {
 
   const token = useGetToken("investor");
   const email = token?.email;
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleVideoCall = () => {
     if (!activeChat) return;
@@ -686,6 +695,7 @@ const ChatPage = () => {
                         </div>
                       );
                     })}
+                    <div ref={messagesEndRef} />
                   </div>
   
                   <div className="p-2 sm:p-4 border-t border-gray-200 bg-white">

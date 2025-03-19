@@ -13,4 +13,7 @@ export interface IInvestorRepository {
     addpremium(id:string,startdate:Date,enddate:Date,email:string):Promise<IInvestordata | null>
     addreview(modelId:string,rating:number,review:string,email:string):Promise< IModelData | null>
     getReciever(id:string):Promise<IChatData | null>
+    savemodel(email:string,modelId:string):Promise<IInvestordata | null>
+    unsavemodel(email:string,modelId:string):Promise<IInvestordata | null>
+    exclusiveModel():Promise<IModelData[] | null>
 }

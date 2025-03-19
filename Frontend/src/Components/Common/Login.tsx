@@ -55,7 +55,17 @@ const Login: React.FC = () => {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       const { credential } = credentialResponse;
-      const response = await axios.post(`http://localhost:3009/api/${userType}/google-login`, { token: credential });
+      
+      const payload = JSON.parse(atob(credential.split('.')[1]));
+      
+      const email = payload.email;
+      
+      
+      const response = await axios.post(`http://localhost:3009/api/${userType}/google-login`, { 
+        token: credential,
+        email: email ,
+        user:userType // You might want to send this explicitly
+      });
       
       if (response.data.token) {
         if (userType === "entrepreneur") {
@@ -75,7 +85,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <GoogleOAuthProvider clientId="49798631664-vhfjak8p3thsc7b2g5giafm62cb1128s.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="47427121826-p61iendcce2dbfin1ie78omlgspjuv9s.apps.googleusercontent.com">
       <Navbar logoUrl={logo} shortLogoUrl={shortlogo} links={[{ label: "Home", href: "/" }, { label: "Explore Premium", href: "/explore-premium" }, { label: "About Us", href: "/about-us" }]} />
       <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 relative">
         <div className="bg-white rounded-[2%] shadow-lg p-4 sm:p-6 md:p-10 flex flex-col md:flex-row w-full max-w-md md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10">

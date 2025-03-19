@@ -15,7 +15,9 @@ import {GetEntrpreneurUsecase,
     AdminInvestorDetailsusecase,
     InvestorstatusUsecase,
     Addplanusecase,
-    Getplanusecase
+    Getplanusecase,
+    AdminEntrepreneurModels,
+    Adminmodeldetails
   } from "../../Usecase"
 
 import {AdminRepository} from "../../Infrastructure/Repository"
@@ -58,6 +60,8 @@ const AdminInvestorDetailsusecaseInstance = new AdminInvestorDetailsusecase(Admi
 const InvestorstatusUsecaseInstance = new InvestorstatusUsecase(AdminRepositoryInstance)
 const AddplanusecaseInstance = new Addplanusecase()
 const GetplanusecaseInstance = new Getplanusecase(AdminRepositoryInstance)
+const AdminEntrepreneurModelsInstance = new AdminEntrepreneurModels(AdminRepositoryInstance)
+const AdminmodeldetailsInstance = new Adminmodeldetails(AdminRepositoryInstance)
 const AdminControllerInstance = new AdminController(AdminLoginUsecaseInstance,
     GetInvestorUsecaseInstance,
     GetEntrepreneurUsecaseInstance,
@@ -69,7 +73,9 @@ const AdminControllerInstance = new AdminController(AdminLoginUsecaseInstance,
     AdminInvestorDetailsusecaseInstance,
     InvestorstatusUsecaseInstance,
     AddplanusecaseInstance,
-    GetplanusecaseInstance
+    GetplanusecaseInstance,
+    AdminEntrepreneurModelsInstance,
+    AdminmodeldetailsInstance
     );
 
 router.post("/login",(req,res,next)=>{
@@ -121,4 +127,12 @@ router.put("/categorylist",(req,res,next)=>{
   AdminControllerInstance.getPlans(req,res,next)
  })
 
+ router.get("/entrepreneurmodels/:id",(req,res,next)=>{
+  AdminControllerInstance.GetentreprenuerModel(req,res,next)
+ })
+
+ router.get("/model-details/:id",(req,res,next)=>{
+  console.log("inroute ")
+  AdminControllerInstance.modelDetails(req,res,next)
+ })
 export {router as AdminRouter}

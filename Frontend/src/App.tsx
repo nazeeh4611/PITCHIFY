@@ -9,6 +9,7 @@ const App:React.FC = () =>{
   return (
     <>
         {/* <Elements stripe={stripePromise}> */}
+
       <Approutes/>
       {/* </Elements> */}
     </>

@@ -6,11 +6,15 @@ import Common from "./Commonroutes";
 import { Provider } from "react-redux";
 import  store  from "../Redux/Store";
 import Admin from "./Admin";
+import { ChatBotProvider } from "../Components/Chat/ChatProvider";
 
 const Approutes:React.FC = ()=>{
+    const GEMINI_API_KEY = "AIzaSyB89Te2svBe4-gpwXedgi25_KLxzUtzolQ" || 'your-api-key';
 
     return(
         <Provider store={store}>
+                <ChatBotProvider apiKey={GEMINI_API_KEY}>
+
         <Router>
             <Routes>
                 <Route path="/*" element={<Common/>}/>
@@ -20,6 +24,8 @@ const Approutes:React.FC = ()=>{
                 
             </Routes>
         </Router>
+        </ChatBotProvider>
+
         </Provider>
     )
 }

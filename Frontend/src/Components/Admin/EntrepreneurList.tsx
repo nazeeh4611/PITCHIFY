@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import axios from 'axios';
 import Adminnav from './Adminnav';
@@ -6,9 +7,24 @@ import { baseurl } from '../../Constent/regex';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+interface Entrepreneur {
+  _id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  profile: string;
+  is_Blocked: boolean;
+}
+
 const EntrepreneurList: React.FC = () => {
-  const [Entrepreneur, setEntrepreneur] = useState<any[]>([]);
-  const [selectedEntrepreneur, setSelectedEntrepreneur] = useState<any | null>(null);
+  const [entrepreneurs, setEntrepreneurs] = useState<Entrepreneur[]>([]);
+  const [selectedEntrepreneur, setSelectedEntrepreneur] = useState<Entrepreneur | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   const getEntrepreneur = async () => {
     try {
@@ -22,7 +38,7 @@ const EntrepreneurList: React.FC = () => {
       const response = await api.get('/admin/entrepreneurlist');
       console.log(response);
       const fetchedEntrepreneurs = Array.isArray(response.data) ? response.data : [response.data];
-      setEntrepreneur(fetchedEntrepreneurs);
+      setEntrepreneurs(fetchedEntrepreneurs);
     } catch (error) {
       console.error('Error fetching entrepreneurs:', error);
     }
@@ -44,7 +60,7 @@ const EntrepreneurList: React.FC = () => {
       const response = await api.post('/admin/entrepreneurblock', { email });
       console.log(response);
 
-      setEntrepreneur((prevEntrepreneurs) =>
+      setEntrepreneurs((prevEntrepreneurs) =>
         prevEntrepreneurs.map((entrepreneur) =>
           entrepreneur.email === email
             ? { ...entrepreneur, is_Blocked: !isBlocked }
@@ -58,7 +74,7 @@ const EntrepreneurList: React.FC = () => {
     }
   };
 
-  const confirmBlock = (entrepreneur: any) => {
+  const confirmBlock = (entrepreneur: Entrepreneur) => {
     setSelectedEntrepreneur(entrepreneur);
   };
 
@@ -75,16 +91,31 @@ const EntrepreneurList: React.FC = () => {
 
   return (
     <>
-      <Adminnav />
-      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow-lg p-4 flex w-full max-w-6xl space-x-6">
+      <Adminnav toggleSidebar={toggleSidebar} />
+
+      {/* Mobile Sidebar */}
+      <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 md:hidden ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={toggleSidebar}>
+      </div>
+      <div className={`fixed left-0 top-0 h-full w-64 bg-gray-100 z-50 transform transition-transform duration-300 md:hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="pt-16 px-4 h-full">
           <Sidebar />
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-center items-center min-h-screen bg-gray-100 p-4 pt-20">
+        <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col md:flex-row w-full max-w-6xl">
+          {/* Desktop Sidebar */}
+          <div className="hidden md:block w-1/4 md:mr-6">
+            <Sidebar />
+          </div>
 
           <div
-            className="flex-1 bg-white rounded-lg shadow-lg p-6 space-y-4"
+            className="w-full md:flex-1 bg-white rounded-lg shadow-lg p-4 md:p-6 space-y-4"
             style={{
-              height: '80vh',
-              overflowY: 'auto',
+              minHeight: "80vh",
+              height: "auto",
+              overflowY: "auto",
             }}
           >
             <div className="bg-indigo-950 text-white rounded-lg px-6 py-3 flex justify-center items-center">
@@ -92,20 +123,20 @@ const EntrepreneurList: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              {Entrepreneur.map((entrepreneur) => (
+              {entrepreneurs.map((entrepreneur) => (
                 <div
                   key={entrepreneur._id}
-                  className="p-2 flex items-center shadow-md border rounded-lg"
+                  className="p-2 flex flex-col sm:flex-row items-start sm:items-center shadow-md border rounded-lg"
                   style={{
-                    height: '5rem',
+                    minHeight: "4rem",
                   }}
                 >
-                  <img
-                    src={entrepreneur.profile}
-                    alt=""
-                    className="h-12 w-12 rounded-full object-cover border mr-4"
-                  />
-                  <div className="flex items-center space-x-3 w-1/3">
+                  <div className="flex items-center space-x-3 w-full sm:w-1/3 mb-2 sm:mb-0">
+                    <img
+                      src={entrepreneur.profile}
+                      alt=""
+                      className="h-10 w-10 rounded-full object-cover border"
+                    />
                     <div>
                       <h3 className="font-medium text-sm">
                         {entrepreneur.firstname} {entrepreneur.lastname}
@@ -113,11 +144,11 @@ const EntrepreneurList: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="text-center w-1/3">
+                  <div className="w-full sm:w-1/3 sm:text-center mb-2 sm:mb-0">
                     <p className="text-gray-600 text-sm">{entrepreneur.email}</p>
                   </div>
 
-                  <div className="w-1/3 flex justify-end">
+                  <div className="w-full sm:w-1/3 flex justify-start sm:justify-end">
                     <button
                       className={`px-4 py-1 rounded-lg text-white text-sm font-medium ${
                         entrepreneur.is_Blocked
@@ -128,6 +159,11 @@ const EntrepreneurList: React.FC = () => {
                     >
                       {entrepreneur.is_Blocked ? 'Unblock' : 'Block'}
                     </button>
+                    <button
+                      className='px-4 py-1 rounded-lg text-white text-sm font-medium bg-blue-900'
+                   onClick={()=>navigate(`/admin/entrepreneurlist/${entrepreneur._id}`)} >
+                      View
+                    </button>
                   </div>
                 </div>
               ))}
@@ -137,8 +173,8 @@ const EntrepreneurList: React.FC = () => {
       </div>
 
       {selectedEntrepreneur && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg m-4">
             <h2 className="text-lg font-semibold text-gray-800">
               Are you sure you want to {selectedEntrepreneur.is_Blocked ? 'unblock' : 'block'}{' '}
               {selectedEntrepreneur.firstname}?

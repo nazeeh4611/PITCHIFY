@@ -21,15 +21,17 @@ interface BusinessModel {
   rating: number;
   image: string;
   locked?: boolean;
+  saved?: boolean;
 }
 
 interface BusinessCardProps {
   model: BusinessModel;
   hasPremium: boolean;
   onPremiumRequired: () => void;
+  onSaveModel: (modelId: string, saved: boolean) => void;
 }
 
-const BusinessCard: React.FC<BusinessCardProps> = ({ model, hasPremium, onPremiumRequired }) => {
+const BusinessCard: React.FC<BusinessCardProps> = ({ model, hasPremium, onPremiumRequired, onSaveModel }) => {
   const navigate = useNavigate();
   
   const handleLearnmore = async() => {
@@ -43,6 +45,17 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ model, hasPremium, onPremiu
     } catch (error) {
       console.error("Navigation error:", error);
     }
+  }
+  
+  const handleSaveModel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (model.locked && !hasPremium) {
+      onPremiumRequired();
+      return;
+    }
+    
+    onSaveModel(model.id, !model.saved);
   }
   
   return (
@@ -74,8 +87,13 @@ const BusinessCard: React.FC<BusinessCardProps> = ({ model, hasPremium, onPremiu
               <button className="p-2 sm:p-3 hover:bg-indigo-50 rounded-xl transition-colors">
                 <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-700" />
               </button>
-              <button className="p-2 sm:p-3 hover:bg-indigo-50 rounded-xl transition-colors">
-                <Bookmark className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-700" />
+              <button 
+                className={`p-2 sm:p-3 hover:bg-indigo-50 rounded-xl transition-colors ${model.saved ? 'bg-indigo-50' : ''}`}
+                onClick={handleSaveModel}
+              >
+                <Bookmark 
+                  className={`w-5 h-5 sm:w-6 sm:h-6 ${model.saved ? 'text-indigo-900 fill-indigo-700' : 'text-indigo-700'}`}
+                />
               </button>
             </div>
           </div>
@@ -141,6 +159,9 @@ const BusinessModelsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFloatingSearch, setShowFloatingSearch] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [savedModels, setSavedModels] = useState<string[]>([]);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -155,8 +176,44 @@ const BusinessModelsPage: React.FC = () => {
   const token = useGetToken("investor");
   const email = token?.email;
   
+  const api = axios.create({
+    baseURL: baseurl
+  });
+  
   const hasPremium = profile.premium ? Object.keys(profile.premium).length > 0 : false;
-  const getModels = async () => {
+  
+  const fetchSavedModels = async () => {
+    if (!email) return [];
+    
+    try {
+      const response = await api.post('/investor/profile', {
+        email
+      });
+      
+      if (response.data && response.data.investor && response.data.investor.Investor) {
+        const data = response.data.investor.Investor;
+        
+        if (data.savedmodel && Array.isArray(data.savedmodel)) {
+            const savedModelIds = data.savedmodel.map((model: any) => {
+            return typeof model === 'object' ? (model.modelId || model._id) : model;
+          }).filter(Boolean);
+          
+          setSavedModels(savedModelIds);
+          return savedModelIds;
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching saved models:', error);
+      return [];
+    } finally {
+      setProfileLoaded(true);
+    }
+  };
+  
+  const getModels = async (savedModelIds: string[] = []) => {
+    if (!email) return;
+    
     try {
       const queryParams = new URLSearchParams(location.search);
       const categoryId = queryParams.get('category');
@@ -165,20 +222,24 @@ const BusinessModelsPage: React.FC = () => {
         category: categoryId,
       });
       
-      const fetchedModels = response.data.map((item: any, index: number) => ({
-        id: item._id,
-        name: item.businessName,
-        company: item.company || '',
-        category: item.industryFocus.categoryname,
-        location: item.location || 'Unknown',
-        summary: item.marketOpportunities,
-        fundingGoal: parseFloat(item.fundinggoal),
-        rating: item.rating || 0,
-        image: item.industryFocus.image || '',
-        locked: index > 0
-      }));
-      
-      setModels(fetchedModels);
+      if (response.data && Array.isArray(response.data)) {
+        const fetchedModels = response.data.map((item: any, index: number) => ({
+          id: item._id,
+          name: item.businessName,
+          company: item.company || '',
+          category: item.industryFocus?.categoryname || 'General',
+          location: item.location || 'Unknown',
+          summary: item.marketOpportunities || '',
+          fundingGoal: parseFloat(item.fundinggoal) || 0,
+          rating: item.rating || 0,
+          image: item.industryFocus?.image || '',
+          locked: index > 0,
+          saved: savedModelIds.includes(item._id)
+        }));
+        
+        setModels(fetchedModels);
+        setDataLoaded(true);
+      }
     } catch (error) {
       console.error('Error fetching models:', error);
     }
@@ -188,27 +249,72 @@ const BusinessModelsPage: React.FC = () => {
     if (!email) return;
   
     try {
-      const response = await axios.post(
-        `${baseurl}/investor/profile`,
-        { email },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await api.post('/investor/profile', { email });
 
-      if (response.data.investor.Investor) {
+      if (response.data?.investor?.Investor) {
         setProfile(response.data.investor.Investor);
       }
     } catch (error) {
       console.error("Error fetching profile data:", error);
     }
   };
-
+  
+  const handleSaveModel = async (modelId: string, saved: boolean) => {
+    if (!email) return;
+    
+    try {
+      if (saved) {
+        await api.post('/investor/save-model', {
+          email,
+          modelId,
+          model: modelId
+        });
+        
+        setSavedModels(prev => [...prev, modelId]);
+      } else {
+        await api.post('/investor/unsave-model', {
+          email,
+          modelId,
+          model: modelId
+        });
+        
+        setSavedModels(prev => prev.filter(id => id !== modelId));
+      }
+      
+      setModels(prev => 
+        prev.map(model => 
+          model.id === modelId ? { ...model, saved } : model
+        )
+      );
+      
+    } catch (error) {
+      console.error('Error saving/unsaving model:', error);
+    }
+  };
+  
   useEffect(() => {
-    accessData();
-    getModels();
-  }, [location.search, email]);
-
+    const loadInitialData = async () => {
+      if (email) {
+        await accessData();
+        const savedIds = await fetchSavedModels();
+        await getModels(savedIds);
+      }
+    };
+    
+    loadInitialData();
+  }, [email]);
+  
+  useEffect(() => {
+    if (email && profileLoaded) {
+      const refreshData = async () => {
+        const savedIds = await fetchSavedModels();
+        await getModels(savedIds);
+      };
+      
+      refreshData();
+    }
+  }, [location.search]);
+  
   useEffect(() => {
     const handleScroll = () => {
       const searchSection = document.getElementById('search-section');
@@ -221,6 +327,18 @@ const BusinessModelsPage: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Update models when savedModels changes
+  useEffect(() => {
+    if (dataLoaded && savedModels.length >= 0) {
+      setModels(prev => 
+        prev.map(model => ({
+          ...model,
+          saved: savedModels.includes(model.id)
+        }))
+      );
+    }
+  }, [savedModels, dataLoaded]);
 
   const scrollToSearch = () => {
     searchInputRef.current?.focus();
@@ -249,7 +367,7 @@ const BusinessModelsPage: React.FC = () => {
     navigate('/investor/pricing');
     setShowPremiumModal(false);
   };
-
+  
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-indigo-50 to-white">
       <div className="z-30">
@@ -259,11 +377,13 @@ const BusinessModelsPage: React.FC = () => {
           links={[
             { label: "Home", href: "/investor" },
             { label: "About Us", href: "/about-us" },
+            { label: "Profile", href: "/profile" },
           ]}
         />
       </div>
       
-      <div id="search-section" className="bg-gradient-to-r from-indigo-50 to-purple-50 pb-6 sm:pb-8 pt-6 sm:pt-10 px-4 sm:px-6 shadow-sm">
+      {/* Added more padding at the top (pt-12 sm:pt-16) to increase space under the navbar */}
+      <div id="search-section" className="bg-gradient-to-r from-indigo-50 to-purple-50 pb-6 sm:pb-8 pt-12 sm:pt-16 px-4 sm:px-6 shadow-sm">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col gap-5 sm:gap-8">
             <div className="relative max-w-3xl w-full mx-auto">
@@ -313,6 +433,7 @@ const BusinessModelsPage: React.FC = () => {
                     model={model} 
                     hasPremium={hasPremium}
                     onPremiumRequired={handlePremiumRequired}
+                    onSaveModel={handleSaveModel}
                   />
                 ))}
               </div>

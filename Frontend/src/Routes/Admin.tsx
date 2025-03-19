@@ -6,9 +6,11 @@ import EntrepreneurList from "../Components/Admin/EntrepreneurList";
 import AdminProtectedRoute from "./ProtectedRoutes/AdminProtectedRoute";
 import AdminReverseProtectedRoute from "./ProtectedRoutes/ReverseAdminProtected";
 import Category from "../Components/Admin/Category";
-import InvestorDetails from "../Components/Investor/InvestorDetails";
 import AdminInvestorDetails from "../Components/Admin/AdminInvestorDetails";
 import PremiumPlans from "../Components/Admin/Subscription";
+import EntrepreneurDetails from "../Components/Admin/EntrepreneurDetails";
+import ModelDetails from "../Components/Admin/AdminModeldetails";
+import AdminDashboard from "../Components/Admin/AdminDashboard";
 
 const Admin: React.FC = () => {
   return (
@@ -20,6 +22,9 @@ const Admin: React.FC = () => {
         <Route path="/category" element={<AdminProtectedRoute component={Category}/>} />
         <Route path="/investor-details/:id" element={<AdminProtectedRoute component={AdminInvestorDetails}/>}/>
         <Route path="/subscription" element={<AdminProtectedRoute component={PremiumPlans}/>}/>
+        <Route path="/entrepreneurlist/:id" element={<AdminProtectedRoute component={EntrepreneurDetails}/>}/>
+        <Route path="/model/:id" element={<AdminProtectedRoute component={ModelDetails}/>}/>
+        <Route path="/dashboard" element={<AdminProtectedRoute component={AdminDashboard}/>}/>
       </Routes>
     </>
   );

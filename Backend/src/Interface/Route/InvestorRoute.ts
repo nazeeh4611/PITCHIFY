@@ -22,6 +22,10 @@ import {
   MessageUseCase,
   getReciever,
   getAllchatusecase,
+  GoogleAuthUsecase,
+  savemodelUsecase,
+  UnsavemodelUsecase,
+  exclusivemodelUsecase
   
 } from "../../Usecase";
 import { OtpService } from "../../Infrastructure/service/Otpservice";
@@ -60,6 +64,7 @@ const upload = multer({
 
 const OtpServiceInstance = new OtpService();
 const investorrepositoryInstance = new InvestorRepository();
+const entrepreneurRepositoryInstance = new entrepreneurRepository()
 const ChatRepositoryImplInstance = new ChatRepositoryImpl()
 const MessageRepositoryImplInstance = new MessageRepositoryImpl()
 const AdminRepositoryInstance = new AdminRepository();
@@ -76,12 +81,17 @@ const GetplanusecaseInstance = new Getplanusecase(AdminRepositoryInstance);
 const InvestorsubscritptionusecaseInstance = new Investorsubscritptionusecase(investorrepositoryInstance);
 const ReviewusecaseInstance = new Reviewusecase(investorrepositoryInstance);
 const MessageUseCaseInstance = new MessageUseCase(MessageRepositoryImplInstance,ChatRepositoryImplInstance,investorrepositoryInstance);
+const GoogleAuthUsecaseInstance = new GoogleAuthUsecase(investorrepositoryInstance,entrepreneurRepositoryInstance)
 const getRecieverInstance = new getReciever(investorrepositoryInstance);
 const getAllchatusecaseInstance = new getAllchatusecase(ChatRepositoryImplInstance)
 const CreateChatUseCaseInstance = new CreateChatUseCase(
   ChatRepositoryImplInstance,
   investorrepositoryInstance 
-);const InvestoControllerInstance = new InvestorController(
+);
+ const savemodelUsecaseInstance = new savemodelUsecase(investorrepositoryInstance)
+ const UnsavemodelUsecaseInstance = new UnsavemodelUsecase(investorrepositoryInstance)
+ const exclusivemodelUsecaseInstance = new exclusivemodelUsecase(investorrepositoryInstance)
+ const InvestoControllerInstance = new InvestorController(
   InvestorsignupUsecaseInstance,
   investorverifyOtpUsecaseInstance,
   InvestorLoginUsecaseInstance,
@@ -97,7 +107,11 @@ const CreateChatUseCaseInstance = new CreateChatUseCase(
   CreateChatUseCaseInstance,
   MessageUseCaseInstance,
   getRecieverInstance,
-  getAllchatusecaseInstance
+  getAllchatusecaseInstance,
+  GoogleAuthUsecaseInstance,
+  savemodelUsecaseInstance,
+  UnsavemodelUsecaseInstance,
+  exclusivemodelUsecaseInstance
 );
 
 // Routes
@@ -176,4 +190,20 @@ router.get("/get-messages/:chatId", (req, res, next) => {
   InvestoControllerInstance.message(req,res,next)
 })
 
+
+router.post("/google-login",(req,res,next)=>{
+  InvestoControllerInstance.googleLogin(req,res,next)
+})
+router.post("/save-model",(req,res,next)=>{
+  InvestoControllerInstance.savemodel(req,res,next)
+})
+
+router.post("/unsave-model",(req,res,next)=>{
+  InvestoControllerInstance.unsavemodel(req,res,next)
+})
+
+router.get('/exclusivemodels',(req,res,next)=>{
+  console.log("modelllelleleeleel")
+  InvestoControllerInstance.exclusivemodel(req,res,next)
+})
 export { router as InvestorRouter };
