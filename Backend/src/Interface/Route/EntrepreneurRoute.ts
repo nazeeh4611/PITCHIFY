@@ -17,7 +17,8 @@ import { EntrepreneurController } from "../Controller/EntrepreneurController";
   EntrepreneurMessageUseCase,
   GetInvestorUsecase,
   EntrepreneurCreateChatUseCase,
-  GoogleAuthUsecase
+  GoogleAuthUsecase,
+  
 } from "../../Usecase";
 import { OtpService } from '../../Infrastructure/service/Otpservice';
 import { S3Client } from "@aws-sdk/client-s3"; 
@@ -113,7 +114,7 @@ const EntrepreneurControllerInstance = new EntrepreneurController(
      EntrepreneurMessageUseCaseInstance,
      GetInvestorUsecaseInstance,
      EntrepreneurCreateChatUseCaseInstance,
-     GoogleAuthUsecaseInstance
+     GoogleAuthUsecaseInstance,
      );
 router.post("/register", (req, res, next) => {
     EntrepreneurControllerInstance.signup(req, res, next);
@@ -132,7 +133,8 @@ router.post("/profile",(req,res,next)=>{
     EntrepreneurControllerInstance.getProfile(req,res,next)
 })
 
-router.put("/editprofile", upload2.single("avatar"), (req, res,next) => {
+router.put("/editprofile", upload2.single("profile"), (req, res,next) => {
+  console.log("myyyy")
   EntrepreneurControllerInstance.editProfile(req,res,next);
 });
 
@@ -188,6 +190,7 @@ router.get("/get-investors",(req,res,next)=>{
 router.post("/create-chat",(req,res,next)=>{
   EntrepreneurControllerInstance.createChat(req,res,next)
 })
+
 
 
 

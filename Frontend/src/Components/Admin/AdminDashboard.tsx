@@ -7,11 +7,42 @@ import Adminnav from './Adminnav';
 import { baseurl } from '../../Constent/regex';
 import { BusinessModel } from '../../Interfacetypes/types';
 
-// Simple SVG Pie Chart Component
-const PieChart: React.FC<{
-  data: { name: string; value: number; color: string }[];
+interface ChartDataItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface PieChartProps {
+  data: ChartDataItem[];
   size?: number;
-}> = ({ data, size = 200 }) => {
+}
+
+interface BarChartProps {
+  data: ChartDataItem[];
+  size?: { width: number; height: number };
+}
+
+interface ChartLegendProps {
+  data: ChartDataItem[];
+}
+
+interface SubscriptionPlan {
+  _id: string;
+  planName: string;
+  users: number;
+}
+
+interface UserStats {
+  investors: number;
+  entrepreneurs: number;
+  investorPremium: number;
+  entrepreneurPremium: number;
+  investorNonPremium: number;
+  entrepreneurNonPremium: number;
+}
+
+const PieChart: React.FC<PieChartProps> = ({ data, size = 200 }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   let startAngle = 0;
   
@@ -24,7 +55,6 @@ const PieChart: React.FC<{
           const angle = (item.value / total) * 360;
           const endAngle = startAngle + angle;
           
-          // Calculate the path for the slice
           const x1 = Math.cos((startAngle * Math.PI) / 180) * (size / 2.5);
           const y1 = Math.sin((startAngle * Math.PI) / 180) * (size / 2.5);
           const x2 = Math.cos((endAngle * Math.PI) / 180) * (size / 2.5);
@@ -57,10 +87,7 @@ const PieChart: React.FC<{
   );
 };
 
-// Legend Component
-const ChartLegend: React.FC<{
-  data: { name: string; value: number; color: string }[];
-}> = ({ data }) => {
+const ChartLegend: React.FC<ChartLegendProps> = ({ data }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
   return (
@@ -80,16 +107,49 @@ const ChartLegend: React.FC<{
   );
 };
 
+// Simpler alternative bar chart implementation with div-based bars
+const SimpleBarChart: React.FC<{ data: ChartDataItem[] }> = ({ data }) => {
+  const maxValue = Math.max(...data.map(item => item.value), 1);
+  
+  return (
+    <div className="w-full max-w-xs">
+      {data.map((item, index) => {
+        const percentage = (item.value / maxValue) * 100;
+        return (
+          <div key={index} className="mb-4">
+            <div className="flex justify-between mb-1">
+              <span className="text-sm font-medium">{item.name}</span>
+              <span className="text-sm font-medium">{item.value}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="h-2.5 rounded-full" 
+                style={{ 
+                  width: `${percentage}%`,
+                  backgroundColor: item.color 
+                }}
+              ></div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const AdminDashboard: React.FC = () => {
   const [model, setModel] = useState<BusinessModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userStats, setUserStats] = useState({
+  const [userStats, setUserStats] = useState<UserStats>({
     investors: 0,
     entrepreneurs: 0,
-    premiumUsers: 0,
-    nonPremiumUsers: 0
+    investorPremium: 0,
+    entrepreneurPremium: 0,
+    investorNonPremium: 0,
+    entrepreneurNonPremium: 0
   });
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -128,37 +188,86 @@ const AdminDashboard: React.FC = () => {
       setUserStats({
         investors: response.data.investorCount || 0,
         entrepreneurs: response.data.entrepreneurCount || 0,
-        premiumUsers: response.data.premiumUserCount || 0,
-        nonPremiumUsers: response.data.nonPremiumUserCount || 0
+        investorPremium: response.data.investorPremium || 0,
+        entrepreneurPremium: response.data.entrepreneurPremium || 0,
+        investorNonPremium: response.data.investorNonPremium || 0,
+        entrepreneurNonPremium: response.data.entrepreneurNonPremium || 0
       });
     } catch (error) {
       console.error("Error fetching user statistics:", error);
-      // Set some example data for development
+      // Fallback data
       setUserStats({
-        investors: 150,
-        entrepreneurs: 320,
-        premiumUsers: 200,
-        nonPremiumUsers: 270
+        investors: 7,
+        entrepreneurs: 6,
+        investorPremium: 2,
+        entrepreneurPremium: 1,
+        investorNonPremium: 5,
+        entrepreneurNonPremium: 5
       });
     }
   };
 
+  const getSubscriptionPlans = async () => {
+    try {
+      const api = axios.create({
+        baseURL: baseurl,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('admin')}`,
+        },
+      });
+
+      const response = await api.get('/admin/premium-plan');
+      if (response.data && Array.isArray(response.data)) {
+        setSubscriptionPlans(response.data);
+      } else {
+        // Fallback data if API response is not in expected format
+        setSubscriptionPlans([
+          { _id: '1', planName: 'Monthly', users: 3 },
+          { _id: '2', planName: 'Quarterly', users: 5 },
+          { _id: '3', planName: 'Half-Yearly', users: 2 }
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching subscription plans:", error);
+      // Fallback data
+      setSubscriptionPlans([
+        { _id: '1', planName: 'Monthly', users: 3 },
+        { _id: '2', planName: 'Quarterly', users: 5 },
+        { _id: '3', planName: 'Half-Yearly', users: 2 }
+      ]);
+    }
+  };
+
   useEffect(() => {
+    getUserStats();
+    getSubscriptionPlans();
     if (id) {
       getModelDetails();
     }
-    getUserStats();
   }, [id]);
 
-  const userTypeData = [
+  const userTypeData: ChartDataItem[] = [
     { name: "Investors", value: userStats.investors, color: "#0088FE" },
     { name: "Entrepreneurs", value: userStats.entrepreneurs, color: "#00C49F" }
   ];
 
-  const subscriptionData = [
-    { name: "Premium Users", value: userStats.premiumUsers, color: "#FFBB28" },
-    { name: "Non-Premium Users", value: userStats.nonPremiumUsers, color: "#FF8042" }
+  const subscriptionData: ChartDataItem[] = [
+    { name: "Premium Investors", value: userStats.investorPremium, color: "#FFBB28" },
+    { name: "Premium Entrepreneurs", value: userStats.entrepreneurPremium, color: "#FF8042" }
   ];
+
+  const nonPremiumData: ChartDataItem[] = [
+    { name: "Non-Premium Investors", value: userStats.investorNonPremium, color: "#8884d8" },
+    { name: "Non-Premium Entrepreneurs", value: userStats.entrepreneurNonPremium, color: "#82ca9d" }
+  ];
+
+  const colorPalette = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#CDDC39"];
+  
+  const subscriptionPlanData: ChartDataItem[] = subscriptionPlans.map((plan, index) => ({
+    name: plan.planName,
+    value: plan.users,
+    color: colorPalette[index % colorPalette.length]
+  }));
 
   return (
     <>
@@ -205,14 +314,56 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="bg-white rounded-lg shadow p-4">
-                <h2 className="text-xl font-bold mb-4 text-center">Subscription Status</h2>
+                <h2 className="text-xl font-bold mb-4 text-center">Premium Subscription Status</h2>
                 <div className="flex flex-col items-center">
                   <PieChart data={subscriptionData} />
                   <ChartLegend data={subscriptionData} />
                 </div>
                 <div className="mt-4 text-center">
                   <p className="text-sm text-gray-600">
-                    Total Users: {userStats.premiumUsers + userStats.nonPremiumUsers}
+                    Total Premium Users: {userStats.investorPremium + userStats.entrepreneurPremium}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-4">
+                <h2 className="text-xl font-bold mb-4 text-center">Non-Premium Users</h2>
+                <div className="flex flex-col items-center">
+                  <PieChart data={nonPremiumData} />
+                  <ChartLegend data={nonPremiumData} />
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-600">
+                    Total Non-Premium Users: {userStats.investorNonPremium + userStats.entrepreneurNonPremium}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow p-4">
+                <h2 className="text-xl font-bold mb-4 text-center">Subscription Plan Users</h2>
+                <div className="flex flex-col items-center py-2">
+                  {subscriptionPlans.length > 0 ? (
+                    <div className="w-full">
+                      <SimpleBarChart data={subscriptionPlanData} />
+                      <div className="mt-4">
+                        {subscriptionPlanData.map((plan, index) => (
+                          <div key={index} className="flex items-center mb-1">
+                            <div 
+                              className="w-4 h-4 mr-2" 
+                              style={{ backgroundColor: plan.color }}
+                            ></div>
+                            <span className="text-sm">{plan.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 my-10">No subscription plan data available</p>
+                  )}
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-600">
+                    Total Plans: {subscriptionPlans.length}
                   </p>
                 </div>
               </div>

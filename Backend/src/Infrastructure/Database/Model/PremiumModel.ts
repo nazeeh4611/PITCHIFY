@@ -4,8 +4,9 @@ export interface ISubscriptionPlan extends Document {
     planName: string;
   description: string;
   planPrice: number;
-  Duration: number; // Duration in months, for example
+  Duration: number; 
   isActive: boolean;
+  users:number;
 }
 
 const SubscriptionPlanSchema = new Schema<ISubscriptionPlan>(
@@ -15,6 +16,7 @@ const SubscriptionPlanSchema = new Schema<ISubscriptionPlan>(
     planPrice: { type: Number, required: true },
     Duration: { type: Number, required: true }, 
     isActive: { type: Boolean, default: true },
+    users:{type:Number,default:0}
   },
   {
     timestamps: true,

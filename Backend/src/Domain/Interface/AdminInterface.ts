@@ -18,4 +18,12 @@ export interface Iadminrepository {
     getAllpremium():Promise<IPremium[] | null>
     entrepreneurModels(id:string):Promise<any>
     modelDetails(id:string):Promise<IModelData | null>
+    DashboardDetails():Promise<{ 
+        entrepreneurCount: number; 
+        investorCount: number; 
+        entrepreneurPremium: number; 
+        investorPremium: number; 
+        entrepreneurNonPremium:number;
+        investorNonPremium:number;
+      }>
 }

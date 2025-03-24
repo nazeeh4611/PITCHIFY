@@ -1,5 +1,5 @@
 import { IInvestordata } from "../Database/Model/Investormodel";
-import { ChatModel, InvestorModel,BusinessModel } from "../Database/Model";
+import { ChatModel, InvestorModel,BusinessModel, PremiumModel } from "../Database/Model";
 import { IInvestorRepository } from "../../Domain/Interface/InvestorInterface";
 import { Investor } from "../../Domain/entities";
 import { IModelData } from "../../Domain/entities/modelentities";
@@ -40,7 +40,7 @@ export class InvestorRepository implements IInvestorRepository {
         try {
             const updatedInvestor = await InvestorModel.findOneAndUpdate(
                 { email: user.email },
-                { firstname: user.firstname, lastname: user.lastname, phone: user.phone },
+                {...user},
                 { new: true }
             );
 
@@ -103,6 +103,12 @@ export class InvestorRepository implements IInvestorRepository {
                         'premium.endDate': enddate 
                     }
                 },
+                { new: true }
+            );
+
+            await PremiumModel.findByIdAndUpdate(
+                id,
+                { $inc: { users: 1 } }, 
                 { new: true }
             );
     

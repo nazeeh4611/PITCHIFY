@@ -14,5 +14,4 @@ export interface IEntrepreneurRepository {
   modeldetails(id: Types.ObjectId): Promise<IModelData | null>;
   editmodel(model: Partial<Model>, id: Types.ObjectId): Promise<IModelData>;
   addpremium(id:string,startdate:Date,enddate:Date,email:string):Promise<IEntrepreneurdata | null>
-
 }

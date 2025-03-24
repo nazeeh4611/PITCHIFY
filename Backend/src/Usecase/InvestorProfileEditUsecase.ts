@@ -6,9 +6,9 @@ export class InvestorProfileEditUsecase{
         private InvestorRepository:IInvestorRepository
     ){}
 
-    async execute(email:string,firstname:string,lastname:string,phone:number):Promise<IInvestordata | null>{
+    async execute(email:string,firstname:string,lastname:string,phone:number,profile:string):Promise<IInvestordata | null>{
         try {
-            const updatedInvestor = await this.InvestorRepository.update({email,firstname,lastname,phone})
+            const updatedInvestor = await this.InvestorRepository.update({email,firstname,lastname,phone,profile})
             if(!updatedInvestor){
                 throw new Error("failed to find investor")
             }

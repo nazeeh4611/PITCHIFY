@@ -24,6 +24,7 @@ interface FetchedPremiumPlan {
     is_Listed: boolean;
     features: string[]; 
     buttonText: string;  
+    users:number
 }
 
 const stripePromise = loadStripe("your_stripe_publishable_key");
@@ -38,6 +39,7 @@ const PremiumPlans: React.FC = () => {
         Duration: 0,
         planPrice: 0,
         description: "",
+        
     });
     const [editPremiumPlan, setEditPremiumPlan] = useState<FetchedPremiumPlan | null>(null);
     const [subscribedPlan, setSubscribedPlan] = useState<FetchedPremiumPlan | null>(null);
@@ -163,6 +165,8 @@ const PremiumPlans: React.FC = () => {
                                                 <p className="text-xs">Duration: {plan.Duration} months</p>
                                                 <p className="text-xs">Price: ${plan.planPrice}</p>
                                                 <p className="text-xs">Description: {plan.description}</p>
+                                                <p className="text-xs">Users: {plan.users}</p>
+
                                             </div>
                                         </div>
 

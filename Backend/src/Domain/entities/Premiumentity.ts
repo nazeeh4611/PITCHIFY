@@ -7,6 +7,7 @@
         planPrice: number;
         Duration:number;
         description:string;
+        users:number;
     }
     export class Premium implements IPremium {
         _id: Types.ObjectId;
@@ -14,6 +15,7 @@
         planPrice: number;
         Duration:number;
         description:string;
+        users: number;
 
         constructor(data: Partial<IPremium>) {
             this._id = data._id || new Types.ObjectId();
@@ -21,6 +23,7 @@
             this.planPrice = data.planPrice!;
             this.Duration = data.Duration!;
             this.description = data.description!;
+            this.users = data.users!
         }
 
         toPlanData(): IPremium {
@@ -29,7 +32,8 @@
                 planName: this.planName,
                 planPrice: this.planPrice,
                 Duration: this.Duration,
-                description:this.description
+                description:this.description,
+                users:this.users
             };
         }
 

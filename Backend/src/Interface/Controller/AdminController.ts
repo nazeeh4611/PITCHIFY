@@ -16,7 +16,8 @@ import { AdminLoginUsecase,
     Addplanusecase,
     Getplanusecase,
     AdminEntrepreneurModels,
-    Adminmodeldetails
+    Adminmodeldetails,
+    DahboardUsecase
 } from "../../Usecase";
 import { Types } from "mongoose";
 
@@ -35,7 +36,8 @@ export class AdminController {
         private addplanusecase:Addplanusecase,
         private getplanusecase:Getplanusecase,
         private entrepreneurmodelusecase:AdminEntrepreneurModels,
-        private adminmodeldetailsusecase:Adminmodeldetails
+        private adminmodeldetailsusecase:Adminmodeldetails,
+        private dashboardusecase:DahboardUsecase
     ){}
 
 
@@ -250,5 +252,20 @@ export class AdminController {
         res.status(500).json({message:"Internal server error"})
     }
   }
+
+
+
+  async getDashboardData(req:Request,res:Response,next:NextFunction):Promise<void>{
+    try {
+
+        console.log("call is comming")
+        const response = await this.dashboardusecase.execute()
+        console.log(response,"may in controller")
+        res.status(200).json(response)
+    } catch (error) {
+        
+    }
+}
+
 
 }

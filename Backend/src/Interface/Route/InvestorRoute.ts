@@ -61,6 +61,24 @@ const upload = multer({
     },
   }),
 });
+const s3Client2 = new S3Client({
+  region: "eu-north-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
+  },
+});
+
+const upload2 = multer({
+  storage: multerS3({
+    s3: s3Client2,
+    bucket: "pitchify-profile-image", 
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString() + "-" + file.originalname);
+    },
+  }),
+});
 
 const OtpServiceInstance = new OtpService();
 const investorrepositoryInstance = new InvestorRepository();
@@ -131,7 +149,7 @@ router.post("/profile", (req, res, next) => {
   InvestoControllerInstance.getProfile(req, res, next);
 });
 
-router.put("/editprofile",  (req, res, next) => {
+router.put("/editprofile", upload2.single("profile"), (req, res, next) => {
   InvestoControllerInstance.editProfile(req, res, next);
 });
 

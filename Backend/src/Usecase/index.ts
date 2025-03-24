@@ -16,7 +16,7 @@ export * from "./EntrepreneurCreateChat"
 export * from "./InvestorSavemodelUsecase"
 export * from "./InvestorUnsavemodelUsecase"
 export * from "./ExclusivemodelsUsecase"
-
+export * from "./DashboardUsecase"
 // Investor usecases
 
 export * from "./InvestorVerifyotp"

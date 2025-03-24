@@ -174,6 +174,43 @@ async modelDetails(id:string):Promise<IModelData | null>{
       return null
   }
 }
+async  DashboardDetails(): Promise<{ 
+  entrepreneurCount: number; 
+  investorCount: number; 
+  entrepreneurPremium: number; 
+  investorPremium: number; 
+  entrepreneurNonPremium: number;
+  investorNonPremium: number;
+}> {
+  try {
+    const entrepreneurCount = await Entrepreneurmodel.countDocuments();
+    const investorCount = await Investormodel.countDocuments();
+
+    const entrepreneurPremium = await Entrepreneurmodel.countDocuments({ 
+      "premium.plan": { $exists: true, $ne: null } 
+    });
+
+    const investorPremium = await Investormodel.countDocuments({
+      "premium.plan": { $exists: true, $ne: null }
+    });
+
+    const entrepreneurNonPremium = entrepreneurCount - entrepreneurPremium;
+    const investorNonPremium = investorCount - investorPremium;
+
+    return {
+      entrepreneurCount,
+      investorCount,
+      entrepreneurPremium,
+      investorPremium,
+      entrepreneurNonPremium,
+      investorNonPremium
+    };
+  } catch (error) {
+    console.error("Error in DashboardDetails:", error);
+    throw new Error("Failed to fetch dashboard details");
+  }
+}
+
 
 
 }

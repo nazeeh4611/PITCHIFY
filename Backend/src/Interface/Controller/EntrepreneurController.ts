@@ -18,7 +18,7 @@ import { signupUsecase,
     EntrepreneurMessageUseCase,
     GetInvestorUsecase,
     EntrepreneurCreateChatUseCase,
-    GoogleAuthUsecase
+    GoogleAuthUsecase,
 } from '../../Usecase'
 import { Types } from 'mongoose';
 
@@ -42,7 +42,7 @@ export class EntrepreneurController {
         private sendmessagusecase:EntrepreneurMessageUseCase,
         private getinvestorusecase:GetInvestorUsecase,
         private createChatusecase:EntrepreneurCreateChatUseCase,
-        private googleauthusecase:GoogleAuthUsecase
+        private googleauthusecase:GoogleAuthUsecase,
     ) {}
 
     async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -192,15 +192,18 @@ export class EntrepreneurController {
 
     async editProfile(req:Request,res:Response,next:NextFunction){
         try {
+
             const updatedProfile = req.body
             const email = updatedProfile.email
             const phone = updatedProfile.phone
             const fname = updatedProfile.firstname
             const lname = updatedProfile.lastname
             const image =(req.file as Express.MulterS3.File).location;
+            console.log(image)
 
-
+         console.log("opopoo",email)
          const response = await this.editProfileUsecase.execute(email,fname,lname,phone,image)
+         console.log("upadted")
            res.status(200).json({success:false,message:"data is updated"})
         } catch (error) {
             res.status(500).json({success:false,message:"internal server error"})
@@ -430,7 +433,7 @@ export class EntrepreneurController {
         }
     }
 
-    
+
     
 
 }

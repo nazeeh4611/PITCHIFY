@@ -10,6 +10,7 @@ interface Investor {
   firstname: string;
   lastname: string;
   email: string;
+  profile: string;
   is_Blocked: boolean;
   status: string; 
 }
@@ -93,6 +94,18 @@ const InvestorList: React.FC = () => {
                     minHeight: "4rem",
                   }}
                 >
+                   <div className="flex items-center space-x-3 w-full sm:w-1/3 mb-2 sm:mb-0">
+                    <img
+                      src={investor.profile}
+                      alt=""
+                      className="h-10 w-10 rounded-full object-cover border"
+                    />
+                    <div>
+                      <h3 className="font-medium text-sm">
+                        {investor.firstname} {investor.lastname}
+                      </h3>
+                    </div>
+                  </div>
                   <div className="flex items-center space-x-3 w-full sm:w-1/3 mb-2 sm:mb-0">
                     <div>
                       <h3 className="font-medium text-sm">

@@ -51,3 +51,5 @@ const EntrepreneurSchema = new Schema<IEntrepreneurdata>(
 );
 
 export default model<IEntrepreneurdata>("Entrepreneur", EntrepreneurSchema);
+
+

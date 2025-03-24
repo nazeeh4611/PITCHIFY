@@ -4,6 +4,7 @@ import BusinessModel, { IModelData } from "../Database/Model/ModelsModel";
 import { IEntrepreneurRepository } from "../../Domain/Interface/EntrepreneurInterface";
 import { Entrepreneur } from "../../Domain/entities/entrepreneurentities";
 import { Model } from "../../Domain/entities/modelentities";
+import { PremiumModel } from "../Database/Model";
 
 export class entrepreneurRepository implements IEntrepreneurRepository {
   async findbyEmail(email: string): Promise<IEntrepreneurdata | null> {
@@ -39,7 +40,6 @@ export class entrepreneurRepository implements IEntrepreneurRepository {
         { ...user },
         { new: true }
       );
-      console.log(updatedEntrepreneur,"this beteh updated entrepreneur")
       if (!updatedEntrepreneur) {
         throw new Error("Entrepreneur not found.");
       }
@@ -77,11 +77,11 @@ export class entrepreneurRepository implements IEntrepreneurRepository {
           path: "businessModels",
           populate: [
             {
-              path: "reviews",  // Populating the reviews
-              model: "Review",  // Specify the model for reviews
+              path: "reviews",  
+              model: "Review",  
               populate: {
-                path: "rated_by",  // Populating the investor (rated_by)
-                model: "Investor",  // Specify the model for investors
+                path: "rated_by",  
+                model: "Investor", 
               },
             },
           ],
@@ -141,6 +141,12 @@ export class entrepreneurRepository implements IEntrepreneurRepository {
             },
             { new: true }
         );
+
+        await PremiumModel.findByIdAndUpdate(
+          id,
+          { $inc: { users: 1 } }, 
+          { new: true }
+      );
 
         return result; 
     } catch (error) {

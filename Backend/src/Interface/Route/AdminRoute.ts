@@ -17,10 +17,11 @@ import {GetEntrpreneurUsecase,
     Addplanusecase,
     Getplanusecase,
     AdminEntrepreneurModels,
-    Adminmodeldetails
+    Adminmodeldetails,
+    DahboardUsecase
   } from "../../Usecase"
 
-import {AdminRepository} from "../../Infrastructure/Repository"
+import {AdminRepository, InvestorRepository, entrepreneurRepository} from "../../Infrastructure/Repository"
 import authMiddleware from "../Middleware/Auth"; 
 
   
@@ -62,6 +63,7 @@ const AddplanusecaseInstance = new Addplanusecase()
 const GetplanusecaseInstance = new Getplanusecase(AdminRepositoryInstance)
 const AdminEntrepreneurModelsInstance = new AdminEntrepreneurModels(AdminRepositoryInstance)
 const AdminmodeldetailsInstance = new Adminmodeldetails(AdminRepositoryInstance)
+const DahboardUsecaseInstance = new DahboardUsecase(AdminRepositoryInstance)
 const AdminControllerInstance = new AdminController(AdminLoginUsecaseInstance,
     GetInvestorUsecaseInstance,
     GetEntrepreneurUsecaseInstance,
@@ -75,7 +77,8 @@ const AdminControllerInstance = new AdminController(AdminLoginUsecaseInstance,
     AddplanusecaseInstance,
     GetplanusecaseInstance,
     AdminEntrepreneurModelsInstance,
-    AdminmodeldetailsInstance
+    AdminmodeldetailsInstance,
+    DahboardUsecaseInstance
     );
 
 router.post("/login",(req,res,next)=>{
@@ -132,7 +135,10 @@ router.put("/categorylist",(req,res,next)=>{
  })
 
  router.get("/model-details/:id",(req,res,next)=>{
-  console.log("inroute ")
   AdminControllerInstance.modelDetails(req,res,next)
  })
+
+ router.get("/user-statistics",(req,res,next)=>{
+    AdminControllerInstance.getDashboardData(req,res,next)
+  })
 export {router as AdminRouter}

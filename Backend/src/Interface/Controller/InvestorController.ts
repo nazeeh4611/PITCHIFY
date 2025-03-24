@@ -228,10 +228,11 @@ export class InvestorController{
             const phone = updatedProfile.phone
             const fname = updatedProfile.firstname
             const lname = updatedProfile.lastname
-         const response = await this.editprofileusecase.execute(email,fname,lname,phone)
+            const image =(req.file as Express.MulterS3.File).location;
+         const response = await this.editprofileusecase.execute(email,fname,lname,phone,image)
            res.status(200).json({success:false,message:"data is updated"})
         } catch (error) {
-            
+            res.status(500).json({message:"Internal server error"})
         }
     }
 
@@ -465,7 +466,6 @@ async unsavemodel(req:Request,res:Response,next:NextFunction):Promise<void>{
 async exclusivemodel(req:Request,res:Response,next:NextFunction):Promise<void>{
     try {
         const response = await this.exclusivemodelusecase.execute()
-
         res.status(200).json(response)
     } catch (error) {
         

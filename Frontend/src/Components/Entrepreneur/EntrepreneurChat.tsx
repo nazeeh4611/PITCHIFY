@@ -449,78 +449,76 @@ const EntrepreneurChat = () => {
     <div className="flex-1 flex justify-center items-center bg-gray-100 p-4">
         <div
           className="bg-white rounded-[2%] shadow-lg p-1 sm:p-2 md:p-4 flex flex-col md:flex-row w-full max-w-full sm:max-w-full md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"
-          style={{
-            height: "80vh",
-          }}
+          style={{ height: "80vh" }}
         >
-<div className="hidden md:block md:w-1/4 border-r border-gray-200">
-          <Sidebar onSectionChange={(id) => console.log(id)} />
-        </div>
+          <div className="hidden md:block md:w-1/4 border-r border-gray-200">
+            <Sidebar onSectionChange={(id) => console.log(id)} />
+          </div>
 
-        <div className="w-full md:w-3/4 flex flex-col md:flex-row">
-          <div className="w-full md:w-1/3 border-r border-gray-200 flex flex-col">
-            <div className="bg-[#1e1b4b] p-4">
-              <h1 className="text-2xl font-bold mb-4 text-white">Chats</h1>
-              <div className="relative">
-                <div className="w-full p-2 pl-8 rounded-lg border border-gray-300 bg-gray-200 animate-pulse h-10"></div>
-                <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
+          <div className="w-full md:w-3/4 flex flex-col md:flex-row">
+            <div className="w-full md:w-1/3 border-r border-gray-200 flex flex-col">
+              <div className="bg-[#1e1b4b] p-4">
+                <h1 className="text-2xl font-bold mb-4 text-white">Chats</h1>
+                <div className="relative">
+                  <div className="w-full p-2 pl-8 rounded-lg border border-gray-300 bg-gray-200 animate-pulse h-10"></div>
+                  <Search className="absolute left-2 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center p-4 border-b border-gray-100">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+                    <div className="ml-3 flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <div className="h-4 bg-gray-200 animate-pulse rounded w-24"></div>
+                        <div className="h-3 bg-gray-200 animate-pulse rounded w-10"></div>
+                      </div>
+                      <div className="h-3 bg-gray-200 animate-pulse rounded w-32"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center p-4 border-b border-gray-100">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-                  <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="h-4 bg-gray-200 animate-pulse rounded w-24"></div>
-                      <div className="h-3 bg-gray-200 animate-pulse rounded w-10"></div>
-                    </div>
-                    <div className="h-3 bg-gray-200 animate-pulse rounded w-32"></div>
+
+            <div className="hidden md:flex md:w-2/3 flex-col">
+              <div className="bg-[#1e1b4b] p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse"></div>
+                  <div className="ml-3">
+                    <div className="h-4 bg-gray-300 animate-pulse rounded w-24 mb-1"></div>
+                    <div className="h-3 bg-gray-300 animate-pulse rounded w-16"></div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="hidden md:flex md:w-2/3 flex-col">
-            <div className="bg-[#1e1b4b] p-4 flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse"></div>
-                <div className="ml-3">
-                  <div className="h-4 bg-gray-300 animate-pulse rounded w-24 mb-1"></div>
-                  <div className="h-3 bg-gray-300 animate-pulse rounded w-16"></div>
-                </div>
+                <div className="w-6 h-6 bg-gray-300 animate-pulse rounded"></div>
               </div>
-              <div className="w-6 h-6 bg-gray-300 animate-pulse rounded"></div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}
-                >
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {[1, 2, 3, 4].map((i) => (
                   <div
-                    className={`max-w-[70%] rounded-lg p-3 ${
-                      i % 2 === 0
-                        ? 'bg-gray-200 animate-pulse'
-                        : 'bg-gray-300 animate-pulse'
-                    }`}
-                    style={{ height: '50px', width: `${Math.floor(Math.random() * 30) + 40}%` }}
-                  ></div>
-                </div>
-              ))}
-            </div>
+                    key={i}
+                    className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[70%] rounded-lg p-3 ${
+                        i % 2 === 0
+                          ? 'bg-gray-200 animate-pulse'
+                          : 'bg-gray-300 animate-pulse'
+                      }`}
+                      style={{ height: '50px', width: `${Math.floor(Math.random() * 30) + 40}%` }}
+                    ></div>
+                  </div>
+                ))}
+              </div>
 
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 h-10 bg-gray-200 animate-pulse rounded-lg"></div>
-                <div className="w-10 h-10 bg-gray-300 animate-pulse rounded-lg"></div>
+              <div className="p-4 border-t border-gray-200">
+                <div className="flex items-center space-x-2">
+                  <div className="flex-1 h-10 bg-gray-200 animate-pulse rounded-lg"></div>
+                  <div className="w-10 h-10 bg-gray-300 animate-pulse rounded-lg"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 
@@ -593,7 +591,7 @@ const EntrepreneurChat = () => {
             </div>
           </div>
 
-          <div className={`${!showChatList ? 'block' : 'hidden'} md:block w-full md:w-2/3 flex flex-col h-full`}>
+          <div className={`${!showChatList ? 'block' : 'hidden'} md:block w-full md:w-2/3 flex flex-col h-full relative`}>
             {activeChat ? (
               <>
                 <div className="bg-[#1e1b4b] text-white p-4 flex items-center justify-between">
@@ -628,7 +626,7 @@ const EntrepreneurChat = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: "calc(100% - 140px)" }}>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ height: "calc(100% - 140px)" }}>
                   {messages.map((msg) => {
                     const isCurrentUser = msg.sender === currentUserId;
                     return (
@@ -678,8 +676,8 @@ const EntrepreneurChat = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-2 sm:p-4 border-t border-gray-200">
-                  <div className="flex items-center space-x-2">
+                <div className="w-full border-t border-gray-200 absolute bottom-0 bg-white">
+                  <div className="flex items-center space-x-2 p-2 sm:p-4">
                     <input
                       type="text"
                       value={message}
