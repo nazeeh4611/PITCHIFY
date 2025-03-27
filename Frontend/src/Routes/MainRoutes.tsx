@@ -9,7 +9,7 @@ import Admin from "./Admin";
 import { ChatBotProvider } from "../Components/Chat/ChatProvider";
 
 const Approutes:React.FC = ()=>{
-    const GEMINI_API_KEY = "AIzaSyB89Te2svBe4-gpwXedgi25_KLxzUtzolQ" || 'your-api-key';
+    const GEMINI_API_KEY = "AIzaSyB89Te2svBe4-gpwXedgi25_KLxzUtzolQ";
 
     return(
         <Provider store={store}>

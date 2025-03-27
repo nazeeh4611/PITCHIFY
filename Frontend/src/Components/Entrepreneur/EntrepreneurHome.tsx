@@ -105,9 +105,11 @@ const EntrepreneurHome: React.FC = () => {
               Turn your innovative business ideas into reality by connecting with investors.
             </p>
             <div className="flex gap-4">
+            <Link to="/entrepreneur/models">
               <button className="bg-indigo-900 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
                 Get Start
               </button>
+              </Link>
               <Link to="/entrepreneur/investor-list">
               <button  className="border border-indigo-900 text-indigo-900 px-6 py-2 rounded-md hover:bg-indigo-50">
                 Investor List

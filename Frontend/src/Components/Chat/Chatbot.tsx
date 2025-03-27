@@ -16,7 +16,7 @@ interface ChatBotProps {
 
 const ChatBot: React.FC<ChatBotProps> = ({ 
   apiKey, 
-  modelName = 'gemini-pro', 
+  modelName = 'gemini-1.5-pro', 
   initialMessage = 'Hello! How can I help you today?' 
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -58,25 +58,19 @@ const ChatBot: React.FC<ChatBotProps> = ({
     setIsLoading(true);
   
     try {
-      // Call the Gemini API
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      // Ensure the correct model is used
+      const model = genAI.getGenerativeModel({ model: modelName });
+  
+      console.log('Sending request to Gemini API:', { model: modelName, content: inputValue });
+  
+      // Use generateContentStream for better streaming support
+      const result = await model.generateContentStream(inputValue);
       
-      // Log the request for debugging
-      console.log('Sending request to Gemini API:', { 
-        model: modelName, 
-        content: inputValue 
-      });
-      
-      // Make the API call
-      const result = await model.generateContent(inputValue);
-      
-      // Log the raw response
       console.log('Received response from Gemini API:', result);
       
-      const response = result.response;
+      const response = await result.response;
       const text = response.text();
   
-      // Add bot response to messages
       const botMessage: ChatMessage = {
         role: 'bot',
         content: text,
@@ -85,37 +79,15 @@ const ChatBot: React.FC<ChatBotProps> = ({
   
       setMessages(prevMessages => [...prevMessages, botMessage]);
     } catch (error) {
-      // Log the detailed error
       console.error('Error calling Gemini AI:', error);
+      const errorMessage = 'Sorry, I encountered an error. Please try again later.';
       
-      // Provide more specific error message if possible
-      let errorMessage = 'Sorry, I encountered an error. Please try again later.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('API key')) {
-          errorMessage = 'Invalid API key. Please check your configuration.';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'Network error. Please check your internet connection.';
-        } else if (error.message.includes('quota')) {
-          errorMessage = 'API quota exceeded. Please try again later.';
-        }
-        
-        // Add the error message to the console for debugging
-        console.error('Error details:', error.message);
-      }
-      
-      // Add error message to chat
-      const botMessage: ChatMessage = {
-        role: 'bot',
-        content: errorMessage,
-        timestamp: new Date()
-      };
-      
-      setMessages(prevMessages => [...prevMessages, botMessage]);
+      setMessages(prevMessages => [...prevMessages, { role: 'bot', content: errorMessage, timestamp: new Date() }]);
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
