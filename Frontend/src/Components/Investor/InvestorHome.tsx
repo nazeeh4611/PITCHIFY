@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Layout/Navbar";
 import Footer from "../Layout/Footer";
@@ -10,25 +10,45 @@ import { Investor } from "../../Interfacetypes/types";
 import { useGetToken } from "../../token/Gettoken";
 import { Lock } from "lucide-react";
 
-interface TextLoopProps {
+interface TextCyclerProps {
   words: string[];
   interval?: number;
 }
 
-const TextLoop: React.FC<TextLoopProps> = ({ words = [], interval = 2000 }) => {
+const TextCycler: React.FC<TextCyclerProps> = ({ words = [], interval = 2000 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setIsVisible(false);
-      setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
-        setIsVisible(true);
-      }, 200);
-    }, interval);
+    // Don't set up anything if we have no words
+    if (words.length === 0) return;
 
-    return () => clearInterval(intervalId);
+    const startCycle = () => {
+      // Clear any existing intervals/timeouts
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      
+      intervalRef.current = setInterval(() => {
+        // Start fade out
+        setIsVisible(false);
+        
+        // Wait for fade out and then change word and fade in
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+          setCurrentIndex(prev => (prev + 1) % words.length);
+          setIsVisible(true);
+        }, 200);
+      }, interval);
+    };
+
+    startCycle();
+
+    // Cleanup on unmount
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [words.length, interval]);
 
   return (
@@ -196,7 +216,7 @@ const InvestorHome = () => {
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-800">
                 Invest in{" "}
-                <TextLoop 
+                <TextCycler 
                   words={["Innovation", "Technology", "Opportunities", "Creativity"]} 
                   interval={2000} 
                 />
