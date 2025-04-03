@@ -187,6 +187,7 @@ const InvestorHome = () => {
           { label: "About Us", href: "/about-us" },
           { label: "Profile", href: "/investor/profile" },
         ]}
+        homeRoute="/investor"
       />
 
       <div className="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8">

@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { ReviewModel } from "../../Infrastructure/Database/Model";
+import { ReviewModel } from "../../Infrastructure/Database/Model/Index";
 
 export interface IReview {
     _id?: Types.ObjectId;

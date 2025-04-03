@@ -258,11 +258,13 @@ const Select = () => {
         shortLogoUrl={shortlogo}
         links={[
           { label: "Home", href: "/" },
-          { label: "Explore Premium", href: "/explore-premium" },
+          { label: "Explore Premium", href: "/select" },
           { label: "About Us", href: "/about-us" },
-          { label: "Login", href: "/login" },
         ]}
+        homeRoute="/"  
       />
+
+
       <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 relative">
         <div
           className="bg-white rounded-[2%] shadow-lg p-4 sm:p-6 md:p-10 flex flex-col md:flex-row w-full max-w-sm sm:max-w-md md:max-w-4xl lg:max-w-[85%] xl:max-w-[1300px] relative z-10"

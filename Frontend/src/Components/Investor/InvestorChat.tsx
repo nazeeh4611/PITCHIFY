@@ -6,21 +6,11 @@ import Navbar from '../Layout/Navbar';
 import shortlogo from "../Layout/Image/shortlogo.png";
 import logo from "../Layout/Image/logo.jpeg";
 import Sidebar from './InvestorSidebar';
-import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 import { baseurl } from '../../Constent/regex';
 import axios from 'axios';
 import { useGetToken } from '../../token/Gettoken';
-
-interface ChatMessage {
-  id: string;
-  sender: string;
-  message: string;
-  timestamp: string;
-  createdAt: string;
-  avatar: string;
-  isVideoCall?: boolean;
-  videoLink?: string;
-}
+import {ChatMessage} from "../../Interfacetypes/types"
 
 interface Chat {
   id: string;
@@ -50,6 +40,19 @@ interface MessageResponse {
 
 interface OnlineUsers {
   [key: string]: boolean;
+}
+
+interface MessageData {
+  id: string;
+  sender: string;
+  message: string;
+  chatId: string;
+  timestamp: string;
+  createdAt: string;
+  avatar?: string;
+  videoLink?: string;
+  isVideoCall?: boolean;
+  receiverId?: string;
 }
 
 const ChatPage = () => {
@@ -87,6 +90,12 @@ const ChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  function sanitizeText(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   const handleVideoCall = () => {
     if (!activeChat) return;
     const videoCallLink = `${window.location.origin}/entrepreneur/video-call/${activeChat}`;
@@ -103,6 +112,8 @@ const ChatPage = () => {
   };
 
   const handleJoinVideoCall = (videoLink: string) => {
+    if (!videoLink) return;
+    
     const linkMatch = videoLink.match(/\/video-call\/([^"'\s]+)/);
     if (linkMatch && linkMatch[1]) {
       const extractedChatId = linkMatch[1];
@@ -156,7 +167,7 @@ const ChatPage = () => {
           return {
             id: msg._id,
             sender: msg.sender,
-            message: msg.content,
+            message: sanitizeText(msg.content),
             timestamp: formatMessageTime(msg.createdAt),
             createdAt: msg.createdAt,
             avatar: "/api/placeholder/40/40"
@@ -336,46 +347,97 @@ const ChatPage = () => {
     if (socket) {
       socket.removeAllListeners("receive_message");
       socket.on("receive_message", (data: any) => {
-        if (data.sender !== email) {
-          if (data.message && data.message.includes('video call')) {
-            const linkMatch = data.message.match(/Join using this link: (.+)/);
-            const videoLink = linkMatch ? linkMatch[1] : '';
-            
-            const formattedMessage: ChatMessage = {
-              id: data.id,
-              sender: data.sender,
-              message: "Video Call",
-              timestamp: data.timestamp,
-              createdAt: data.createdAt,
-              avatar: "/api/placeholder/40/40",
-              isVideoCall: true,
-              videoLink: videoLink
-            };
-            
-            setMessages(prevMessages => {
-              const messageExists = prevMessages.some(msg => msg.id === data.id);
-              if (messageExists) return prevMessages;
-              return [...prevMessages, formattedMessage];
-            });
-            
-            if (window.confirm('You received a video call invitation. Would you like to join?')) {
-              handleJoinVideoCall(videoLink);
-            }
-          } else {
-            setMessages(prevMessages => {
-              const messageExists = prevMessages.some(msg => msg.id === data.id);
-              if (messageExists) return prevMessages;
-              return [...prevMessages, data];
-            });
+        try {
+          if (!data || typeof data !== 'object') {
+            console.error("Received invalid message format");
+            return;
           }
-          
-          setChats(prevChats => 
-            prevChats.map(chat => 
-              chat.id === activeChat 
-                ? { ...chat, lastMessage: data.isVideoCall ? "Video Call" : data.message, timestamp: data.timestamp }
-                : chat
-            )
-          );
+
+          const requiredFields = ['id', 'sender', 'message', 'chatId', 'timestamp', 'createdAt'];
+          for (const field of requiredFields) {
+            if (data[field] === undefined) {
+              console.error(`Received message missing required field: ${field}`);
+              return;
+            }
+          }
+
+          if (typeof data.id !== 'string' || 
+              typeof data.sender !== 'string' || 
+              typeof data.chatId !== 'string' ||
+              typeof data.message !== 'string' ||
+              typeof data.timestamp !== 'string') {
+            console.error("Received message contains invalid field types");
+            return;
+          }
+
+          const sanitizedData: MessageData = {
+            id: data.id,
+            sender: data.sender,
+            message: sanitizeText(data.message),
+            chatId: data.chatId,
+            timestamp: data.timestamp,
+            createdAt: data.createdAt
+          };
+
+          if (sanitizedData.sender !== email) {
+            if (sanitizedData.chatId === activeChat) {
+              if (sanitizedData.message && sanitizedData.message.includes('video call')) {
+                const linkMatch = sanitizedData.message.match(/Join using this link: (.+)/);
+                const videoLink = linkMatch ? sanitizeText(linkMatch[1]) : '';
+                
+                const formattedMessage: ChatMessage = {
+                  id: sanitizedData.id,
+                  sender: sanitizedData.sender,
+                  message: "Video Call",
+                  timestamp: sanitizedData.timestamp,
+                  createdAt: sanitizedData.createdAt,
+                  avatar: "/api/placeholder/40/40",
+                  isVideoCall: true,
+                  videoLink: videoLink
+                };
+                
+                setMessages(prevMessages => {
+                  const messageExists = prevMessages.some(msg => msg.id === sanitizedData.id);
+                  if (messageExists) return prevMessages;
+                  return [...prevMessages, formattedMessage];
+                });
+                
+                if (window.confirm('You received a video call invitation. Would you like to join?')) {
+                  handleJoinVideoCall(videoLink);
+                }
+              } else {
+                const newMessage: ChatMessage = {
+                  id: sanitizedData.id,
+                  sender: sanitizedData.sender,
+                  message: sanitizedData.message,
+                  timestamp: sanitizedData.timestamp,
+                  createdAt: sanitizedData.createdAt,
+                  avatar: "/api/placeholder/40/40"
+                };
+                
+                setMessages(prevMessages => {
+                  const messageExists = prevMessages.some(msg => msg.id === sanitizedData.id);
+                  if (messageExists) return prevMessages;
+                  return [...prevMessages, newMessage];
+                });
+              }
+            }
+            
+            setChats(prevChats => 
+              prevChats.map(chat => 
+                chat.id === sanitizedData.chatId 
+                  ? { 
+                      ...chat, 
+                      lastMessage: sanitizedData.message && sanitizedData.message.includes('video call') ? 
+                          "Video Call" : sanitizedData.message, 
+                      timestamp: sanitizedData.timestamp 
+                    }
+                  : chat
+              )
+            );
+          }
+        } catch (error) {
+          console.error("Error processing incoming message:", error);
         }
       });
     }
@@ -524,6 +586,7 @@ const ChatPage = () => {
           { label: "Home", href: "/investor" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/investor"
       />
 
       <div className="flex-1 flex justify-center items-center bg-gray-100 p-2 sm:p-4 overflow-hidden">

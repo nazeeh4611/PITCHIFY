@@ -277,6 +277,7 @@ const InvestorSearchPage: React.FC = () => {
           { label: "Home", href: "/entrepreneur" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/entrepreneur"
       />
       <div className="flex-grow flex justify-center items-center p-6 mt-16">
         {isPremiumActive ? renderInvestorsList() : renderPremiumUI()}

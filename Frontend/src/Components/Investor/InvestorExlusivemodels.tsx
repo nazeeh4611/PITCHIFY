@@ -409,6 +409,7 @@ const ExclusiveModels: React.FC = () => {
             { label: "Home", href: "/investor" },
             { label: "About Us", href: "/about-us" },
           ]}
+          homeRoute="/investor"
         />
       </div>
       

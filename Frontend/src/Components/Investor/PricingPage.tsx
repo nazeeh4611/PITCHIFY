@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../Layout/Navbar";
 import logo from "../Layout/Image/logo.jpeg";
 import shortlogo from "../Layout/Image/shortlogo.png";
@@ -10,7 +11,6 @@ import axios from "axios";
 import { baseurl } from "../../Constent/regex";
 import { useGetToken } from "../../token/Gettoken";
 
-// Load Stripe key using environment variables
 const stripePromise = loadStripe("pk_test_51QfxvoLZd98lJL6B6lPy5NrC38ms6TqA7OuEUeXaIKEo72Yug3erw2nmgsCMHpA4uzFPzzKGHmsHc9SD1Li1pbNT00V0KNSA2O");
 
 interface PlanFeature {
@@ -29,6 +29,7 @@ interface PricingPlan {
 }
 
 const PricingPage: React.FC = () => {
+  const navigate = useNavigate();
   const token = useGetToken("investor");
   const email = token?.email;
   const api = axios.create({
@@ -37,13 +38,13 @@ const PricingPage: React.FC = () => {
 
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [investorData, setInvestorData] = useState<any>(null);
   const plansRef = useRef<HTMLDivElement>(null);
 
-  // Comparison features data
   const comparisonFeatures = [
     {
       feature: "Unlimited models available to view",
@@ -116,6 +117,20 @@ const PricingPage: React.FC = () => {
     setSelectedPlan(null);
   };
 
+  const handlePaymentSuccess = () => {
+    setIsModalOpen(false);
+    setIsSuccessModalOpen(true);
+    GetInvestor();
+  };
+
+  const handlePlanAction = (plan: PricingPlan) => {
+    if (hasPremium && hasPremium === plan.planName) {
+      navigate("/investor/premium");
+    } else {
+      handleOpenModal(plan);
+    }
+  };
+
   useEffect(() => {
     getPlans();
     GetInvestor();
@@ -156,6 +171,7 @@ const PricingPage: React.FC = () => {
           { label: "Home", href: "/investor" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/investor"
       />
       <div className="min-h-screen bg-white p-4 md:p-8 mt-16">
         <div className="text-center mb-12">
@@ -164,10 +180,10 @@ const PricingPage: React.FC = () => {
           <div className="flex justify-center gap-4">
             {plans.length > 0 && (
               <button
-                onClick={() => handleOpenModal(plans[0])}
+                onClick={() => handlePlanAction(plans[0])}
                 className="bg-indigo-900 text-white px-6 py-2 rounded-md hover:bg-indigo-800 transition-all duration-300 transform hover:-translate-y-1"
               >
-                Get Premium
+                {hasPremium && hasPremium === plans[0].planName ? "View Details" : "Get Premium"}
               </button>
             )}
             <button
@@ -179,7 +195,6 @@ const PricingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Comparison Section */}
         <div className="max-w-4xl mx-auto my-16">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">Experience the difference</h2>
@@ -250,7 +265,7 @@ const PricingPage: React.FC = () => {
                     ))}
                   </ul>
                   <button
-                    onClick={() => handleOpenModal(plan)}
+                    onClick={() => handlePlanAction(plan)}
                     className={`w-full py-2 rounded-md transition-colors duration-300 transform ${
                       hasPremium && hasPremium === plan.planName
                         ? "bg-white text-indigo-900 border border-indigo-900 hover:bg-indigo-50"
@@ -285,8 +300,61 @@ const PricingPage: React.FC = () => {
                 Complete Your Payment for {selectedPlan.planName} Plan
               </h2>
               <Elements stripe={stripePromise}>
-                <PaymentForm plan={selectedPlan} setIsModalOpen={setIsModalOpen} />
+                <PaymentForm 
+                  plan={selectedPlan} 
+                  setIsModalOpen={setIsModalOpen} 
+                  onPaymentSuccess={handlePaymentSuccess}
+                />
               </Elements>
+            </div>
+          </div>
+        )}
+
+        {isSuccessModalOpen && (
+          <div
+            className="modal-overlay fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setIsSuccessModalOpen(false)}
+            aria-hidden="true"
+          >
+            <div
+              className="modal-content bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+              >
+                &times;
+              </button>
+              <svg 
+                className="mx-auto mb-6 w-24 h-24 text-green-500" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+                />
+              </svg>
+              <h2 className="text-2xl font-bold mb-4 text-indigo-900">Payment Successful!</h2>
+              <p className="text-gray-600 mb-6">You've successfully upgraded to the {selectedPlan?.planName} plan.</p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => setIsSuccessModalOpen(false)}
+                  className="bg-white border border-indigo-900 text-indigo-900 px-6 py-2 rounded-md hover:bg-indigo-50"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => navigate("/investor/premium")}
+                  className="bg-indigo-900 text-white px-6 py-2 rounded-md hover:bg-indigo-800"
+                >
+                  View Details
+                </button>
+              </div>
             </div>
           </div>
         )}

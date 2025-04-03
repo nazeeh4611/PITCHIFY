@@ -1,7 +1,7 @@
 import {IInvestorRepository} from "../Domain/Interface/InvestorInterface"
 import {IEntrepreneurRepository} from "../Domain/Interface/EntrepreneurInterface"
 import { generateRefreshToken, generateToken } from "../Interface/Middleware/tokenauth";
-import { EntrepreneurModel,InvestorModel } from "../Infrastructure/Database/Model";
+import { EntrepreneurModel,InvestorModel } from "../Infrastructure/Database/Model/Index";
 import { Types } from "mongoose";
 import { Investor } from "../Domain/entities/Investorentity";
 

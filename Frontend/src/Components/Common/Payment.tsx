@@ -4,9 +4,10 @@ import axios from 'axios';
 import { baseurl } from '../../Constent/regex';
 import { useGetToken } from '../../token/Gettoken';
 import { useLocation } from 'react-router-dom';
+
 interface PaymentFormProps {
   plan: {
-    _id: string;  
+    _id: string;
     planName: string;
     planPrice: number;
     Duration: number;
@@ -14,13 +15,13 @@ interface PaymentFormProps {
     features: string[];
     buttonText: string;
   };
-  
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;  
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onPaymentSuccess?: () => void;
 }
 
-const PaymentForm: React.FC<PaymentFormProps> = ({ plan, setIsModalOpen }) => {
+const PaymentForm: React.FC<PaymentFormProps> = ({ plan, setIsModalOpen, onPaymentSuccess }) => {
   const location = useLocation();
-  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur"; 
+  const userType = location.pathname.includes("investor") ? "investor" : "entrepreneur";
   const token = useGetToken(userType);
   const email = token?.email;
   const api = axios.create({
@@ -29,14 +30,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ plan, setIsModalOpen }) => {
   });
   const stripe = useStripe();
   const elements = useElements();
-
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [subscribedPlan, setSubscribedPlan] = useState(plan);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!stripe || !elements) return;
+    setError(null);
 
+    if (!stripe || !elements) return;
     const cardElement = elements.getElement(CardElement);
 
     try {
@@ -49,20 +49,23 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ plan, setIsModalOpen }) => {
       });
 
       const { clientSecret } = response.data;
-
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card: cardElement! },
       });
 
       if (result.error) {
-        console.error(result.error.message);
+        setError(result.error.message || 'Payment failed');
+        console.error(result.error);
       } else if (result.paymentIntent?.status === 'succeeded') {
-        setPaymentSuccess(true);
-        setIsModalOpen(false); 
-        setSubscribedPlan(plan);  
+        setIsModalOpen(false);
+        
+        if (onPaymentSuccess) {
+          onPaymentSuccess();
+        }
       }
     } catch (error) {
       console.error('Error creating payment intent:', error);
+      setError('An error occurred during payment. Please try again.');
     }
   };
 
@@ -70,27 +73,41 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ plan, setIsModalOpen }) => {
     <form onSubmit={handleSubmit}>
       <h2 className="text-lg font-bold mb-4">Checkout for {plan.planName}</h2>
       <p className="mb-4">Price: ${plan.planPrice} for {plan.Duration} {plan.Duration === 1 ? "Month" : "Months"}</p>
-      <CardElement />
+      
+      <div className="mb-4">
+        <CardElement 
+          options={{
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                  color: '#aab7c4',
+                },
+              },
+              invalid: {
+                color: '#9e2146',
+              },
+            },
+          }}
+        />
+      </div>
+
+      {error && (
+        <div className="text-red-500 mb-4">
+          {error}
+        </div>
+      )}
+
       <button
         type="submit"
         disabled={!stripe}
-        className="bg-indigo-900 text-white px-6 py-2 rounded-md mt-4 hover:bg-indigo-800"
+        className="w-full bg-indigo-900 text-white px-6 py-2 rounded-md mt-4 hover:bg-indigo-800 disabled:opacity-50"
       >
         Pay ${plan.planPrice}
       </button>
-
-      {paymentSuccess && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-green-500 text-white p-4 rounded-lg">
-            <p>Payment succeeded for {subscribedPlan.planName}!</p>
-          </div>
-        </div>
-      )}
     </form>
   );
 };
 
 export default PaymentForm;
-
-
-

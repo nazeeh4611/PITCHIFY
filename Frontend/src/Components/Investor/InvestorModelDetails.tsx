@@ -136,6 +136,7 @@ const ModelDetailsInvestor: React.FC = () => {
           { label: "Home", href: "/investor" },
           { label: "Profile", href: "/investor/profile" },
         ]}
+        homeRoute="/investor"
       />
       <div className="max-w-4xl mx-auto">
         <button

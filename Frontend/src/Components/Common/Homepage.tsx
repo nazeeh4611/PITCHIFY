@@ -5,7 +5,6 @@ import logo from '../Layout/Image/logo.jpeg';
 import shortlogo from "../Layout/Image/shortlogo.png"
 import Hero from '../Layout/Hero';
 import Footer from '../Layout/Footer';
-import Register from './Register';
 import PremiumCard from './Subscription';
 
 
@@ -21,6 +20,7 @@ function Homepage() {
           { label: 'About Us', href: '/about-us' },
           { label: 'Login', href: '/select' },
         ]}
+        homeRoute="/"
       />
       <Hero/>
       <Footer/>

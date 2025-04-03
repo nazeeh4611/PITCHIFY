@@ -1,5 +1,5 @@
     import { Types } from "mongoose";
-    import { PremiumModel } from "../../Infrastructure/Database/Model"; // Adjust path as needed
+    import { PremiumModel } from "../../Infrastructure/Database/Model/Index"; 
 
     export interface IPremium {
         _id: Types.ObjectId;

@@ -10,7 +10,7 @@ import Navbar from '../Layout/Navbar';
 import Sidebar from './EntrepreneurSidebar';
 import shortlogo from "../Layout/Image/shortlogo.png";
 import logo from "../Layout/Image/logo.jpeg";
-import { ChatMessage,Chat,Investor,MessageResponse } from '../../Interfacetypes/types';
+import { ChatMessage, Chat, Investor, MessageResponse } from '../../Interfacetypes/types';
 
 interface ChatResponse {
   investor: Investor[];
@@ -78,6 +78,12 @@ const EntrepreneurChat = () => {
     if (linkMatch && linkMatch[1]) {
       navigate(`/entrepreneur/video-call/${linkMatch[1]}`);
     }
+  };
+
+  const sanitizeText = (text: string) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   };
 
   const handleSendVideoMessage = async (link: string) => {
@@ -377,44 +383,87 @@ const EntrepreneurChat = () => {
   useEffect(() => {
     if (socket) {
       socket.on("receive_message", (data: any) => {
-        if (data.sender !== currentUserId) {
-          if (data.message && data.message.includes('video call')) {
-            const linkMatch = data.message.match(/Join using this link: (.+)/);
-            const videoLink = linkMatch ? linkMatch[1] : '';
-            
-            const videoCallMessage: ChatMessage = {
-              id: data.id || Date.now().toString(),
-              sender: data.sender,
-              message: "Video Call",
-              timestamp: data.timestamp || formatDateTime().time,
-              createdAt: data.createdAt || new Date().toISOString(),
-              avatar: "/api/placeholder/40/40",
-              isVideoCall: true,
-              videoLink: videoLink
-            };
-            
-            setMessages(prev => [...prev, videoCallMessage]);
-            
-            if (window.confirm('You received a video call invitation. Would you like to join?')) {
-              handleJoinVideoCall(videoLink);
-            }
-          } else {
-            setMessages(prev => [...prev, data]);
+        try {
+          if (!data || typeof data !== 'object') {
+            console.error("Received invalid message format");
+            return;
           }
           
-          setChats(prev => 
-            prev.map(chat => 
-              chat.id === activeChat 
-                ? { 
-                    ...chat, 
-                    lastMessage: data.message?.includes('video call') 
-                      ? "Video Call" 
-                      : data.message,
-                    timestamp: data.timestamp 
-                  }
-                : chat
-            )
-          );
+          const requiredFields = ['id', 'sender', 'message', 'chatId', 'timestamp', 'createdAt'];
+          for (const field of requiredFields) {
+            if (data[field] === undefined) {
+              console.error(`Received message missing required field: ${field}`);
+              return;
+            }
+          }
+          
+          if (typeof data.id !== 'string' || typeof data.sender !== 'string' || 
+              typeof data.chatId !== 'string' || typeof data.message !== 'string' || 
+              typeof data.timestamp !== 'string') {
+            console.error("Received message contains invalid field types");
+            return;
+          }
+          
+          const sanitizedMessage = {
+            id: data.id,
+            sender: data.sender,
+            message: typeof data.message === 'string' ? sanitizeText(data.message) : '',
+            timestamp: data.timestamp,
+            createdAt: data.createdAt,
+            avatar: "/api/placeholder/40/40"
+          };
+          
+          if (data.sender !== currentUserId) {
+            if (data.chatId === activeChat) {
+              if (sanitizedMessage.message.includes('video call')) {
+                const linkMatch = sanitizedMessage.message.match(/Join using this link: (.+)/);
+                const videoLink = linkMatch ? linkMatch[1] : '';
+                
+                const videoCallMessage: ChatMessage = {
+                  id: sanitizedMessage.id,
+                  sender: sanitizedMessage.sender,
+                  message: "Video Call",
+                  timestamp: sanitizedMessage.timestamp,
+                  createdAt: sanitizedMessage.createdAt,
+                  avatar: "/api/placeholder/40/40",
+                  isVideoCall: true,
+                  videoLink: videoLink
+                };
+                
+                setMessages(prev => {
+                  const messageExists = prev.some(msg => msg.id === videoCallMessage.id);
+                  if (messageExists) return prev;
+                  return [...prev, videoCallMessage];
+                });
+                
+                if (window.confirm('You received a video call invitation. Would you like to join?')) {
+                  handleJoinVideoCall(videoLink);
+                }
+              } else {
+                setMessages(prev => {
+                  const messageExists = prev.some(msg => msg.id === sanitizedMessage.id);
+                  if (messageExists) return prev;
+                  return [...prev, sanitizedMessage];
+                });
+              }
+            }
+            
+            setChats(prev => 
+              prev.map(chat => 
+                chat.id === data.chatId 
+                  ? { 
+                      ...chat, 
+                      lastMessage: sanitizedMessage.message.includes('video call') 
+                        ? "Video Call" 
+                        : sanitizedMessage.message,
+                      timestamp: sanitizedMessage.timestamp 
+                    }
+                  : chat
+              )
+            );
+          }
+        } catch (error) {
+          console.error("Error processing incoming message:", error);
         }
       });
     }
@@ -725,6 +774,7 @@ const EntrepreneurChat = () => {
           { label: "Home", href: "/entrepreneur" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/entrepreneur"
       />
       {loading ? renderLoadingState() : renderMainContent()}
     </div>

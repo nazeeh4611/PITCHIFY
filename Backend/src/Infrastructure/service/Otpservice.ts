@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { genarateOtp } from "..";
 import Entrepreneurmodel from '../Database/Model/Entrepreneurmodel';
-import {InvestorModel} from '../Database/Model';
+import {InvestorModel} from '../Database/Model/Index';
 export class OtpService {
     private transporter = nodemailer.createTransport({
         service: "gmail",

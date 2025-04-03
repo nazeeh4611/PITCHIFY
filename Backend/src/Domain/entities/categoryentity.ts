@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { CategoryModel } from "../../Infrastructure/Database/Model"; // Adjust path as needed
+import { CategoryModel } from "../../Infrastructure/Database/Model/Index";
 
 export interface ICategoryData {
     _id: Types.ObjectId;

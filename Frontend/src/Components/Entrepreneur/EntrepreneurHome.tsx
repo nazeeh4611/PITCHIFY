@@ -93,6 +93,7 @@ const EntrepreneurHome: React.FC = () => {
           { label: "About Us", href: "/about-us" },
           {label:"Profile",href:"/entrepreneur/profile"}
         ]}
+        homeRoute="/entrepreneur" 
       />    <div className="min-h-screen bg-gray-50">
       <section className="container mx-auto px-4 py-12 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 items-center">

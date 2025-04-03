@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import {IEntrepreneurRepository} from "../Domain/Interface/EntrepreneurInterface"
-import {BusinessModel} from "../Infrastructure/Database/Model"
+import {BusinessModel} from "../Infrastructure/Database/Model/Index"
 import { Model } from "../Domain/entities";
 
 export class AddmodelUsecase {

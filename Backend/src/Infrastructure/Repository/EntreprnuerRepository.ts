@@ -4,7 +4,7 @@ import BusinessModel, { IModelData } from "../Database/Model/ModelsModel";
 import { IEntrepreneurRepository } from "../../Domain/Interface/EntrepreneurInterface";
 import { Entrepreneur } from "../../Domain/entities/entrepreneurentities";
 import { Model } from "../../Domain/entities/modelentities";
-import { PremiumModel } from "../Database/Model";
+import { PremiumModel } from "../Database/Model/Index";
 
 export class entrepreneurRepository implements IEntrepreneurRepository {
   async findbyEmail(email: string): Promise<IEntrepreneurdata | null> {

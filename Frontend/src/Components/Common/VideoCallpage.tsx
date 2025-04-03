@@ -84,6 +84,7 @@ const VideoCallPage = () => {
           { label: "Home", href: "/entrepreneur" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/entrepreneur"
       />
 
       <div className="flex-1 flex flex-col bg-gray-100 p-4">

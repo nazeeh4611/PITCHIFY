@@ -401,6 +401,7 @@ const EntrepreneurProfile = (): JSX.Element => {
           { label: "Home", href: "/entrepreneur" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/entrepreneur"
       />
 
       <div className="flex-1 flex justify-center items-center bg-gray-100 p-2 sm:p-4 min-h-screen">

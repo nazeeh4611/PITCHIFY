@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChatModel = exports.ReviewModel = exports.PremiumModel = exports.BusinessModel = exports.CategoryModel = exports.InvestorModel = exports.EntrepreneurModel = void 0;
+var Entrepreneurmodel_1 = require("./Entrepreneurmodel");
+Object.defineProperty(exports, "EntrepreneurModel", { enumerable: true, get: function () { return __importDefault(Entrepreneurmodel_1).default; } });
+var Investormodel_1 = require("./Investormodel");
+Object.defineProperty(exports, "InvestorModel", { enumerable: true, get: function () { return __importDefault(Investormodel_1).default; } });
+var CategoryModel_1 = require("./CategoryModel");
+Object.defineProperty(exports, "CategoryModel", { enumerable: true, get: function () { return __importDefault(CategoryModel_1).default; } });
+var ModelsModel_1 = require("./ModelsModel");
+Object.defineProperty(exports, "BusinessModel", { enumerable: true, get: function () { return __importDefault(ModelsModel_1).default; } });
+var PremiumModel_1 = require("./PremiumModel");
+Object.defineProperty(exports, "PremiumModel", { enumerable: true, get: function () { return __importDefault(PremiumModel_1).default; } });
+var ReviewModel_1 = require("./ReviewModel");
+Object.defineProperty(exports, "ReviewModel", { enumerable: true, get: function () { return __importDefault(ReviewModel_1).default; } });
+var ChatModel_1 = require("./ChatModel");
+Object.defineProperty(exports, "ChatModel", { enumerable: true, get: function () { return __importDefault(ChatModel_1).default; } });

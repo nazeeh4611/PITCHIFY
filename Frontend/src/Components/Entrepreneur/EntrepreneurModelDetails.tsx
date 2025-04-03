@@ -123,6 +123,7 @@
             { label: "Home", href: "/entrepreneur" },
             { label: "About Us", href: "/about-us" },
           ]}
+          homeRoute="/entrepreneur" 
         />
         <div className="min-h-screen bg-[#F5F5F5] p-4 md:p-8">
           <div className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto p-6 relative">

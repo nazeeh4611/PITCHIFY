@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Define types for our chat messages
 interface ChatMessage {
   role: 'user' | 'bot';
   content: string;
@@ -26,11 +25,9 @@ const ChatBot: React.FC<ChatBotProps> = ({
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize the Gemini AI client
   const genAI = new GoogleGenerativeAI(apiKey);
 
   useEffect(() => {
-    // Add initial bot message when component mounts
     if (messages.length === 0) {
       setMessages([
         { role: 'bot', content: initialMessage, timestamp: new Date() }
@@ -39,7 +36,6 @@ const ChatBot: React.FC<ChatBotProps> = ({
   }, [initialMessage, messages.length]);
 
   useEffect(() => {
-    // Scroll to the bottom of the chat when new messages are added
     if (endOfMessagesRef.current) {
       endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -58,12 +54,10 @@ const ChatBot: React.FC<ChatBotProps> = ({
     setIsLoading(true);
   
     try {
-      // Ensure the correct model is used
       const model = genAI.getGenerativeModel({ model: modelName });
   
       console.log('Sending request to Gemini API:', { model: modelName, content: inputValue });
   
-      // Use generateContentStream for better streaming support
       const result = await model.generateContentStream(inputValue);
       
       console.log('Received response from Gemini API:', result);
@@ -91,7 +85,6 @@ const ChatBot: React.FC<ChatBotProps> = ({
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Chat button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg flex items-center justify-center"
@@ -108,7 +101,6 @@ const ChatBot: React.FC<ChatBotProps> = ({
         )}
       </button>
 
-      {/* Chat window */}
       {isOpen && (
         <div className="absolute bottom-16 right-0 w-80 md:w-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col"
              style={{ height: '500px' }}>
@@ -125,7 +117,6 @@ const ChatBot: React.FC<ChatBotProps> = ({
             </button>
           </div>
 
-          {/* Chat messages */}
           <div 
             ref={chatContainerRef}
             className="flex-1 overflow-y-auto p-4 space-y-3"
@@ -160,7 +151,6 @@ const ChatBot: React.FC<ChatBotProps> = ({
             <div ref={endOfMessagesRef} />
           </div>
 
-          {/* Chat input */}
           <div className="border-t border-gray-200 p-3">
             <div className="flex items-center">
               <input

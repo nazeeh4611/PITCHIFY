@@ -1,12 +1,12 @@
 import { IInvestordata } from "../Database/Model/Investormodel";
 import Investormodel from "../Database/Model/Investormodel";
-import {PremiumModel} from "../Database/Model";
+import {PremiumModel} from "../Database/Model/Index";
 import Entrepreneurmodel from "../Database/Model/Entrepreneurmodel";
 import { IEntrepreneurdata } from "../Database/Model/Entrepreneurmodel";
 import { Iadminrepository } from "../../Domain/Interface/AdminInterface";
 import { ICategoryData } from "../../Domain/entities";
-import {CategoryModel} from "../Database/Model"
-import {BusinessModel} from "../Database/Model"
+import {CategoryModel} from "../Database/Model/Index"
+import {BusinessModel} from "../Database/Model/Index"
 import { Category } from "../../Domain/entities";
 import { IPremium} from "../../Domain/entities";
 import { IModelData} from "../../Domain/entities";

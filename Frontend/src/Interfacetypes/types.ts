@@ -26,6 +26,8 @@ export interface DecodedToken {
     timestamp: string;
     createdAt: string;
     avatar: string;
+    isVideoCall?: boolean;
+    videoLink?: string;
   }
   
   export interface Chat {

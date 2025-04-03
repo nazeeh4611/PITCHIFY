@@ -1,9 +1,9 @@
 import { IInvestordata } from "../Database/Model/Investormodel";
-import { ChatModel, InvestorModel,BusinessModel, PremiumModel } from "../Database/Model";
+import { ChatModel, InvestorModel,BusinessModel, PremiumModel } from "../Database/Model/Index";
 import { IInvestorRepository } from "../../Domain/Interface/InvestorInterface";
 import { Investor } from "../../Domain/entities";
 import { IModelData } from "../../Domain/entities/modelentities";
-import {ReviewModel} from "../Database/Model"
+import {ReviewModel} from "../Database/Model/Index"
 import { IChatData } from "../../Domain/entities";
 import { Types } from "mongoose";
 

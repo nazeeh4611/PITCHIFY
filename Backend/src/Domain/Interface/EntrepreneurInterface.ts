@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { IEntrepreneurdata } from "../../Infrastructure/Database/Model/Entrepreneurmodel";
-import { Entrepreneur } from "../entities/entrepreneurentities";
+import { Entrepreneur } from "../entities/";
 import { IModelData } from "../../Infrastructure/Database/Model/ModelsModel";
-import { Model } from "../entities/modelentities";
+import { Model } from "../entities/";
 
 export interface IEntrepreneurRepository {
   getbyId(id: string): Promise<IEntrepreneurdata | null>;

@@ -201,6 +201,7 @@ const EntrepreneurPricingPage: React.FC = () => {
           { label: "Home", href: "/entrepreneur" },
           { label: "About Us", href: "/about-us" },
         ]}
+        homeRoute="/entrepreneur"
       />
       <div className="min-h-screen bg-white p-4 md:p-8 mt-16">
         <div className="text-center mb-12">

@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import {EntrepreneurModel,InvestorModel} from "../Database/Model";
+import {EntrepreneurModel,InvestorModel} from "../Database/Model/Index";
 
 
 

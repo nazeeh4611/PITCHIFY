@@ -1,5 +1,4 @@
 import {IEntrepreneurRepository} from "../Domain/Interface/EntrepreneurInterface"
-// import Entrepreneurmodel from '../Infrastructure/Database/Model'
 
 
 

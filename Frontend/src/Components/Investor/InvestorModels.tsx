@@ -379,6 +379,7 @@ const BusinessModelsPage: React.FC = () => {
             { label: "About Us", href: "/about-us" },
             { label: "Profile", href: "/profile" },
           ]}
+          homeRoute="/investor"
         />
       </div>
       
